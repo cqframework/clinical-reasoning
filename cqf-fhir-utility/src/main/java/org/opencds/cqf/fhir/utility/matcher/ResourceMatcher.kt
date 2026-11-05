@@ -9,7 +9,6 @@ import ca.uhn.fhir.model.primitive.DateTimeDt
 import ca.uhn.fhir.rest.param.*
 import java.util.*
 import org.apache.commons.lang3.NotImplementedException
-import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.instance.model.api.*
 
 interface ResourceMatcher {
@@ -374,7 +373,7 @@ interface ResourceMatcher {
         private fun extractReferenceValue(reference: IBaseReference): String? {
             if (
                 reference.referenceElement != null &&
-                    !StringUtils.isEmpty(reference.referenceElement.value)
+                    !reference.referenceElement.value.isNullOrEmpty()
             ) {
                 return reference.referenceElement.value
             } else if (reference.resource != null) {

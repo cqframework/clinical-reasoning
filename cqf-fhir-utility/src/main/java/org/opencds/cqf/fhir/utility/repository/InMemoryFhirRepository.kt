@@ -116,7 +116,7 @@ open class InMemoryFhirRepository : IRepository {
         val idPart = theId.idPart
         val outcome = MethodOutcome(theId, false)
         if (!resources.containsKey(idPart)) {
-            outcome.setCreated(true)
+            outcome.created = true
         }
         if (resource.fhirType() == "SearchParameter") {
             this.resourceMatcher.addCustomParameter(

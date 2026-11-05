@@ -297,7 +297,7 @@ object Searches {
             value: String?,
         ): SearchBuilder {
             val token = TokenParam(value)
-            token.setModifier(modifier)
+            token.modifier = modifier
             getValues().put(name, mutableListOf(token))
 
             return this

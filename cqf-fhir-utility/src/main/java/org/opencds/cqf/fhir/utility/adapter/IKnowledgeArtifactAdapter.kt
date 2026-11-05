@@ -5,7 +5,6 @@ import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
 import java.util.Date
 import java.util.Optional
-import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.dstu3.model.MetadataResource
 import org.hl7.fhir.dstu3.model.Reference
 import org.hl7.fhir.dstu3.model.RelatedArtifact
@@ -27,7 +26,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
     override fun copy(): IDomainResource
 
     fun hasName(): Boolean {
-        return StringUtils.isNotBlank(this.name)
+        return !this.name.isNullOrBlank()
     }
 
     var name: String?
@@ -37,7 +36,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
         }
 
     fun hasTitle(): Boolean {
-        return StringUtils.isNotBlank(this.title)
+        return !this.title.isNullOrBlank()
     }
 
     var title: String?
@@ -51,7 +50,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
             "${this.get().fhirType()} ${if (this.hasTitle()) this.title else this.name}${if (this.hasVersion()) ", " + this.version else ""}"
 
     fun hasUrl(): Boolean {
-        return StringUtils.isNotBlank(this.url)
+        return !this.url.isNullOrBlank()
     }
 
     var url: String?
@@ -61,7 +60,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
         }
 
     fun hasVersion(): Boolean {
-        return StringUtils.isNotBlank(this.version)
+        return !this.version.isNullOrBlank()
     }
 
     var version: String?

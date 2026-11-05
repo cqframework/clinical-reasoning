@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.util.ParametersUtil
-import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.fhir.utility.Constants
 
@@ -140,7 +139,7 @@ interface ILibraryAdapter : IKnowledgeArtifactAdapter {
     }
 
     fun getExpansionParameterName(resourceType: String?, crmiVersion: String?): String {
-        require(!StringUtils.isBlank(resourceType)) { "Missing required parameter: 'resourceType'" }
+        require(!resourceType.isNullOrBlank()) { "Missing required parameter: 'resourceType'" }
 
         val isCrmiV1 = crmiVersion != null && crmiVersion == Constants.CRMI_VERSION_1
 

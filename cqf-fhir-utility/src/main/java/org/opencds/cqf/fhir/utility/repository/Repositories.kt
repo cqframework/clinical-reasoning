@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.context.FhirVersionEnum
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.rest.client.api.IGenericClient
-import kotlin.IllegalArgumentException
 import org.apache.commons.lang3.NotImplementedException
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.opencds.cqf.fhir.utility.client.Clients

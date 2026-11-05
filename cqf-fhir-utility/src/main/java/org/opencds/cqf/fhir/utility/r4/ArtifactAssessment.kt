@@ -115,7 +115,7 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentContentInformationType> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentContentInformationType? {
-            return ArtifactAssessmentContentInformationType.Companion.fromCode(codeString)
+            return ArtifactAssessmentContentInformationType.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -124,7 +124,7 @@ class ArtifactAssessment : Basic {
             if (code.isEmpty) return Enumeration(this)
             return Enumeration(
                 this,
-                ArtifactAssessmentContentInformationType.Companion.fromCode(
+                ArtifactAssessmentContentInformationType.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -320,7 +320,7 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentContentClassifier> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentContentClassifier? {
-            return ArtifactAssessmentContentClassifier.Companion.fromCode(codeString)
+            return ArtifactAssessmentContentClassifier.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -333,7 +333,7 @@ class ArtifactAssessment : Basic {
             }
             return Enumeration(
                 this,
-                ArtifactAssessmentContentClassifier.Companion.fromCode(
+                ArtifactAssessmentContentClassifier.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -489,7 +489,7 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentWorkflowStatus> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentWorkflowStatus? {
-            return ArtifactAssessmentWorkflowStatus.Companion.fromCode(codeString)
+            return ArtifactAssessmentWorkflowStatus.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -502,7 +502,7 @@ class ArtifactAssessment : Basic {
             }
             return Enumeration(
                 this,
-                ArtifactAssessmentWorkflowStatus.Companion.fromCode(
+                ArtifactAssessmentWorkflowStatus.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -611,7 +611,7 @@ class ArtifactAssessment : Basic {
     class ArtifactAssessmentDispositionEnumFactory : EnumFactory<ArtifactAssessmentDisposition> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentDisposition? {
-            return ArtifactAssessmentDisposition.Companion.fromCode(codeString)
+            return ArtifactAssessmentDisposition.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -624,9 +624,7 @@ class ArtifactAssessment : Basic {
             }
             return Enumeration(
                 this,
-                ArtifactAssessmentDisposition.Companion.fromCode(
-                    (code as PrimitiveType<*>).asStringValue()
-                ),
+                ArtifactAssessmentDisposition.fromCode((code as PrimitiveType<*>).asStringValue()),
             )
         }
 
@@ -791,7 +789,7 @@ class ArtifactAssessment : Basic {
 
     fun setDerivedFromContentRelatedArtifact(targetUri: CanonicalType?): ArtifactAssessment {
         val existingRelatedArtifact = this.derivedFromContentRelatedArtifact
-        if (existingRelatedArtifact.isPresent()) {
+        if (existingRelatedArtifact.isPresent) {
             val derivedFromArtifact = existingRelatedArtifact.get()
             derivedFromArtifact.setResourceElement(targetUri)
         } else {
@@ -807,7 +805,7 @@ class ArtifactAssessment : Basic {
             newRelatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DERIVEDFROM)
             newRelatedArtifact.setResourceElement(targetUri)
             content.addExtension(
-                ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                ArtifactAssessmentContentExtension.RELATEDARTIFACT,
                 newRelatedArtifact,
             )
         }
@@ -864,28 +862,20 @@ class ArtifactAssessment : Basic {
         var authorCorrect = false
         val contentExt = this.getExtension()[contentIndex]
         val infoTypeIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.INFOTYPE,
-                null,
-                contentExt.extension,
-            )
+            findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.extension)
         if (infoTypeIndex != -1) {
             val infoTypeExt = contentExt.extension[infoTypeIndex]
             infoTypeCorrect = (infoTypeExt.value as CodeType).code == artifactAssessmentType
         }
         val summaryIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.SUMMARY,
-                null,
-                contentExt.extension,
-            )
+            findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.extension)
         if (summaryIndex != -1) {
             val summaryExt = contentExt.extension[summaryIndex]
             summaryCorrect = (summaryExt.value as StringType).value == artifactAssessmentSummary
         }
         val relatedArtifactList =
             contentExt.extension.filter { e ->
-                e!!.url == ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT
+                e!!.url == ArtifactAssessmentContentExtension.RELATEDARTIFACT
             }
         if (relatedArtifactList.isNotEmpty()) {
             val maybeCitation =
@@ -911,11 +901,7 @@ class ArtifactAssessment : Basic {
             }
         }
         val authorIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.AUTHOR,
-                null,
-                contentExt.extension,
-            )
+            findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.extension)
         if (authorIndex != -1) {
             val authorExt = contentExt.extension[authorIndex]
             authorCorrect = (authorExt.value as Reference).reference == artifactAssessmentAuthor
@@ -941,28 +927,25 @@ class ArtifactAssessment : Basic {
                 val content = this.getExtension()[contentIndex]
                 infoTypeExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.INFOTYPE,
+                        ArtifactAssessmentContentExtension.INFOTYPE,
                         null,
                         content.extension,
                     ) != -1
                 summaryExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.SUMMARY,
+                        ArtifactAssessmentContentExtension.SUMMARY,
                         null,
                         content.extension,
                     ) != -1
                 relatedArtifactExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                        ArtifactAssessmentContentExtension.RELATEDARTIFACT,
                         null,
                         content.extension,
                     ) != -1
                 authorExists =
-                    findIndex(
-                        ArtifactAssessmentContentExtension.Companion.AUTHOR,
-                        null,
-                        content.extension,
-                    ) != -1
+                    findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, content.extension) !=
+                        -1
             }
             return (infoTypeExists || summaryExists || relatedArtifactExists || authorExists) &&
                 dateExists &&
@@ -1264,9 +1247,7 @@ class ArtifactAssessment : Basic {
         ) : Extension(INFOTYPE) {
             init {
                 // validate code
-                ArtifactAssessmentContentInformationType.Companion.fromCode(
-                    informationTypeCode.value
-                )
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.value)
                 this.setValue(informationTypeCode)
             }
         }

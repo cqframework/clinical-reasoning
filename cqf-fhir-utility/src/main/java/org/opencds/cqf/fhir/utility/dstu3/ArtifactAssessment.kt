@@ -105,7 +105,7 @@ class ArtifactAssessment : Basic {
                         if (Configuration.isAcceptInvalidEnums()) {
                             return null
                         } else {
-                            throw FHIRException("Unknown ArtifactAssessment '" + codeString + "'")
+                            throw FHIRException("Unknown ArtifactAssessment '$codeString'")
                         }
                 }
             }
@@ -116,16 +116,16 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentContentInformationType> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentContentInformationType? {
-            return ArtifactAssessmentContentInformationType.Companion.fromCode(codeString)
+            return ArtifactAssessmentContentInformationType.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
         fun fromType(code: Base?): Enumeration<ArtifactAssessmentContentInformationType?>? {
             if (code == null) return null
-            if (code.isEmpty()) return Enumeration<ArtifactAssessmentContentInformationType?>(this)
-            return Enumeration<ArtifactAssessmentContentInformationType?>(
+            if (code.isEmpty) return Enumeration(this)
+            return Enumeration(
                 this,
-                ArtifactAssessmentContentInformationType.Companion.fromCode(
+                ArtifactAssessmentContentInformationType.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -309,7 +309,7 @@ class ArtifactAssessment : Basic {
                         if (Configuration.isAcceptInvalidEnums()) {
                             return null
                         } else {
-                            throw FHIRException("Unknown ArtifactAssessment '" + codeString + "'")
+                            throw FHIRException("Unknown ArtifactAssessment '$codeString'")
                         }
                 }
             }
@@ -320,7 +320,7 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentContentClassifier> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentContentClassifier? {
-            return ArtifactAssessmentContentClassifier.Companion.fromCode(codeString)
+            return ArtifactAssessmentContentClassifier.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -328,12 +328,12 @@ class ArtifactAssessment : Basic {
             if (code == null) {
                 return null
             }
-            if (code.isEmpty()) {
-                return Enumeration<ArtifactAssessmentContentClassifier?>(this)
+            if (code.isEmpty) {
+                return Enumeration(this)
             }
-            return Enumeration<ArtifactAssessmentContentClassifier?>(
+            return Enumeration(
                 this,
-                ArtifactAssessmentContentClassifier.Companion.fromCode(
+                ArtifactAssessmentContentClassifier.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -478,7 +478,7 @@ class ArtifactAssessment : Basic {
                             return null
                         } else {
                             throw FHIRException(
-                                "Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'"
+                                "Unknown ArtifactAssessmentWorkflowStatus code '$codeString'"
                             )
                         }
                 }
@@ -490,7 +490,7 @@ class ArtifactAssessment : Basic {
         EnumFactory<ArtifactAssessmentWorkflowStatus> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentWorkflowStatus? {
-            return ArtifactAssessmentWorkflowStatus.Companion.fromCode(codeString)
+            return ArtifactAssessmentWorkflowStatus.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -498,12 +498,12 @@ class ArtifactAssessment : Basic {
             if (code == null) {
                 return null
             }
-            if (code.isEmpty()) {
-                return Enumeration<ArtifactAssessmentWorkflowStatus?>(this)
+            if (code.isEmpty) {
+                return Enumeration(this)
             }
-            return Enumeration<ArtifactAssessmentWorkflowStatus?>(
+            return Enumeration(
                 this,
-                ArtifactAssessmentWorkflowStatus.Companion.fromCode(
+                ArtifactAssessmentWorkflowStatus.fromCode(
                     (code as PrimitiveType<*>).asStringValue()
                 ),
             )
@@ -601,7 +601,7 @@ class ArtifactAssessment : Basic {
                             return null
                         } else {
                             throw FHIRException(
-                                "Unknown ArtifactAssessmentDisposition code '" + codeString + "'"
+                                "Unknown ArtifactAssessmentDisposition code '$codeString'"
                             )
                         }
                 }
@@ -612,7 +612,7 @@ class ArtifactAssessment : Basic {
     class ArtifactAssessmentDispositionEnumFactory : EnumFactory<ArtifactAssessmentDisposition> {
         @Throws(IllegalArgumentException::class)
         override fun fromCode(codeString: String?): ArtifactAssessmentDisposition? {
-            return ArtifactAssessmentDisposition.Companion.fromCode(codeString)
+            return ArtifactAssessmentDisposition.fromCode(codeString)
         }
 
         @Throws(FHIRException::class)
@@ -620,14 +620,12 @@ class ArtifactAssessment : Basic {
             if (code == null) {
                 return null
             }
-            if (code.isEmpty()) {
-                return Enumeration<ArtifactAssessmentDisposition?>(this)
+            if (code.isEmpty) {
+                return Enumeration(this)
             }
-            return Enumeration<ArtifactAssessmentDisposition?>(
+            return Enumeration(
                 this,
-                ArtifactAssessmentDisposition.Companion.fromCode(
-                    (code as PrimitiveType<*>).asStringValue()
-                ),
+                ArtifactAssessmentDisposition.fromCode((code as PrimitiveType<*>).asStringValue()),
             )
         }
 
@@ -663,19 +661,19 @@ class ArtifactAssessment : Basic {
         if (type != null) {
             content.setInfoType(type)
         }
-        if (text.isPresent() && !StringUtils.isBlank(text.get().getValue())) {
+        if (text.isPresent && !StringUtils.isBlank(text.get().value)) {
             content.setSummary(text.get())
         }
-        if (reference.isPresent() && !StringUtils.isBlank(reference.get().getValue())) {
+        if (reference.isPresent && !StringUtils.isBlank(reference.get().value)) {
             content.addRelatedArtifact(
                 reference.get(),
                 RelatedArtifact.RelatedArtifactType.CITATION,
             )
         }
-        if (user.isPresent() && !StringUtils.isBlank(user.get().getReference())) {
+        if (user.isPresent && !StringUtils.isBlank(user.get().getReference())) {
             content.setAuthorExtension(user.get())
         }
-        if (derivedFromUri.isPresent() && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+        if (derivedFromUri.isPresent && !StringUtils.isBlank(derivedFromUri.get().value)) {
             content.addRelatedArtifact(
                 derivedFromUri.get(),
                 RelatedArtifact.RelatedArtifactType.DERIVEDFROM,
@@ -702,19 +700,19 @@ class ArtifactAssessment : Basic {
         if (type != null) {
             content.setInfoType(type)
         }
-        if (text.isPresent() && !StringUtils.isBlank(text.get().getValue())) {
+        if (text.isPresent && !StringUtils.isBlank(text.get().value)) {
             content.setSummary(text.get())
         }
-        if (reference.isPresent() && !StringUtils.isBlank(reference.get().getValue())) {
+        if (reference.isPresent && !StringUtils.isBlank(reference.get().value)) {
             content.addRelatedArtifact(
                 reference.get(),
                 RelatedArtifact.RelatedArtifactType.CITATION,
             )
         }
-        if (user.isPresent() && !StringUtils.isBlank(user.get().getReference())) {
+        if (user.isPresent && !StringUtils.isBlank(user.get().getReference())) {
             content.setAuthorExtension(user.get())
         }
-        if (derivedFromUri.isPresent() && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+        if (derivedFromUri.isPresent && !StringUtils.isBlank(derivedFromUri.get().value)) {
             content.addRelatedArtifact(
                 derivedFromUri.get(),
                 RelatedArtifact.RelatedArtifactType.DERIVEDFROM,
@@ -722,7 +720,7 @@ class ArtifactAssessment : Basic {
         }
         this.addExtension(content)
         setDateExtension(DateTimeType(Date()))
-        if (targetReference != null && !StringUtils.isBlank(targetReference.getValue())) {
+        if (targetReference != null && !StringUtils.isBlank(targetReference.value)) {
             this.setArtifactExtension(targetReference)
         }
         return this
@@ -732,7 +730,7 @@ class ArtifactAssessment : Basic {
         get() {
             var returnedRelatedArtifact = Optional.empty<RelatedArtifact>()
             val content = Optional.ofNullable<Extension>(this.getExtensionByUrl(CONTENT))
-            if (content.isPresent()) {
+            if (content.isPresent) {
                 val maybeRelatedArtifact =
                     content
                         .get()
@@ -740,12 +738,12 @@ class ArtifactAssessment : Basic {
                         .stream()
                         .filter { extension: Extension? ->
                             extension!!.getUrl() ==
-                                ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT &&
+                                ArtifactAssessmentContentExtension.RELATEDARTIFACT &&
                                 ((extension.getValue() as RelatedArtifact).getType() ==
                                     RelatedArtifact.RelatedArtifactType.DERIVEDFROM)
                         }
                         .findFirst()
-                if (maybeRelatedArtifact.isPresent()) {
+                if (maybeRelatedArtifact.isPresent) {
                     val derivedFromArtifact =
                         maybeRelatedArtifact.get().getValue() as RelatedArtifact
                     returnedRelatedArtifact = Optional.of(derivedFromArtifact)
@@ -756,9 +754,9 @@ class ArtifactAssessment : Basic {
 
     fun setDerivedFromContentRelatedArtifact(targetUri: UriType): ArtifactAssessment {
         val existingRelatedArtifact = this.derivedFromContentRelatedArtifact
-        if (existingRelatedArtifact.isPresent()) {
+        if (existingRelatedArtifact.isPresent) {
             val derivedFromArtifact = existingRelatedArtifact.get()
-            derivedFromArtifact.setResource(Reference(targetUri.getValue()))
+            derivedFromArtifact.setResource(Reference(targetUri.value))
         } else {
             var content = this.getExtensionByUrl(CONTENT)
             if (content == null) {
@@ -770,9 +768,9 @@ class ArtifactAssessment : Basic {
             // to Cast from Basic to ArtifactAssessment or its Extension subclasses
             val newRelatedArtifact = RelatedArtifact()
             newRelatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DERIVEDFROM)
-            newRelatedArtifact.setResource(Reference(targetUri.getValue()))
+            newRelatedArtifact.setResource(Reference(targetUri.value))
             content.addExtension(
-                ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                ArtifactAssessmentContentExtension.RELATEDARTIFACT,
                 newRelatedArtifact,
             )
         }
@@ -807,7 +805,7 @@ class ArtifactAssessment : Basic {
         }
         val artifactIndex = findIndex(ARTIFACT, null, this.getExtension())
         if (artifactIndex != -1) {
-            val artifactExt = this.getExtension().get(artifactIndex)
+            val artifactExt = this.getExtension()[artifactIndex]
             artifactCorrect =
                 (artifactExt.getValue() as Reference).getReference() ==
                     artifactAssessmentTargetReference
@@ -828,38 +826,30 @@ class ArtifactAssessment : Basic {
         var citationRelatedArtifactCorrect = false
         var derivedFromRelatedArtifactCorrect = false
         var authorCorrect = false
-        val contentExt = this.getExtension().get(contentIndex)
+        val contentExt = this.getExtension()[contentIndex]
         val infoTypeIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.INFOTYPE,
-                null,
-                contentExt.getExtension(),
-            )
+            findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension())
         if (infoTypeIndex != -1) {
-            val infoTypeExt = contentExt.getExtension().get(infoTypeIndex)
+            val infoTypeExt = contentExt.getExtension()[infoTypeIndex]
             infoTypeCorrect =
-                (infoTypeExt.getValue() as CodeType).getValueAsString() == artifactAssessmentType
+                (infoTypeExt.getValue() as CodeType).valueAsString == artifactAssessmentType
         }
         val summaryIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.SUMMARY,
-                null,
-                contentExt.getExtension(),
-            )
+            findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension())
         if (summaryIndex != -1) {
-            val summaryExt = contentExt.getExtension().get(summaryIndex)
+            val summaryExt = contentExt.getExtension()[summaryIndex]
             summaryCorrect =
-                (summaryExt.getValue() as StringType).getValue() == artifactAssessmentSummary
+                (summaryExt.getValue() as StringType).value == artifactAssessmentSummary
         }
         val relatedArtifactList =
             contentExt
                 .getExtension()
                 .stream()
                 .filter { e: Extension? ->
-                    e!!.getUrl() == ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT
+                    e!!.getUrl() == ArtifactAssessmentContentExtension.RELATEDARTIFACT
                 }
                 .collect(Collectors.toList())
-        if (!relatedArtifactList.isEmpty()) {
+        if (relatedArtifactList.isNotEmpty()) {
             val maybeCitation =
                 relatedArtifactList
                     .stream()
@@ -876,13 +866,13 @@ class ArtifactAssessment : Basic {
                             RelatedArtifact.RelatedArtifactType.DERIVEDFROM
                     }
                     .findAny()
-            if (maybeCitation.isPresent()) {
+            if (maybeCitation.isPresent) {
                 val citation = maybeCitation.get()
                 citationRelatedArtifactCorrect =
                     ((citation.getValue() as RelatedArtifact).getResource().getReference() ==
                         artifactAssessmentRelatedArtifact)
             }
-            if (maybeDerivedFrom.isPresent()) {
+            if (maybeDerivedFrom.isPresent) {
                 val derivedFrom = maybeDerivedFrom.get()
                 derivedFromRelatedArtifactCorrect =
                     ((derivedFrom.getValue() as RelatedArtifact).getResource().getReference() ==
@@ -890,13 +880,9 @@ class ArtifactAssessment : Basic {
             }
         }
         val authorIndex =
-            findIndex(
-                ArtifactAssessmentContentExtension.Companion.AUTHOR,
-                null,
-                contentExt.getExtension(),
-            )
+            findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension())
         if (authorIndex != -1) {
-            val authorExt = contentExt.getExtension().get(authorIndex)
+            val authorExt = contentExt.getExtension()[authorIndex]
             authorCorrect =
                 (authorExt.getValue() as Reference).getReference() == artifactAssessmentAuthor
         }
@@ -918,28 +904,28 @@ class ArtifactAssessment : Basic {
             val artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1
             val contentIndex = findIndex(CONTENT, null, this.getExtension())
             if (contentIndex != -1) {
-                val content = this.getExtension().get(contentIndex)
+                val content = this.getExtension()[contentIndex]
                 infoTypeExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.INFOTYPE,
+                        ArtifactAssessmentContentExtension.INFOTYPE,
                         null,
                         content.getExtension(),
                     ) != -1
                 summaryExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.SUMMARY,
+                        ArtifactAssessmentContentExtension.SUMMARY,
                         null,
                         content.getExtension(),
                     ) != -1
                 relatedArtifactExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                        ArtifactAssessmentContentExtension.RELATEDARTIFACT,
                         null,
                         content.getExtension(),
                     ) != -1
                 authorExists =
                     findIndex(
-                        ArtifactAssessmentContentExtension.Companion.AUTHOR,
+                        ArtifactAssessmentContentExtension.AUTHOR,
                         null,
                         content.getExtension(),
                     ) != -1
@@ -963,7 +949,7 @@ class ArtifactAssessment : Basic {
         if (target != null && target.getReference() != null) {
             val index = findIndex(ARTIFACT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentArtifactExtension(target))
+                this.extension[index] = ArtifactAssessmentArtifactExtension(target)
             } else {
                 this.addExtension(ArtifactAssessmentArtifactExtension(target))
             }
@@ -972,10 +958,10 @@ class ArtifactAssessment : Basic {
     }
 
     fun setArtifactExtension(target: UriType?): ArtifactAssessment {
-        if (target != null && target.getValue() != null) {
+        if (target != null && target.value != null) {
             val index = findIndex(ARTIFACT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentArtifactExtension(target))
+                this.extension[index] = ArtifactAssessmentArtifactExtension(target)
             } else {
                 this.addExtension(ArtifactAssessmentArtifactExtension(target))
             }
@@ -987,7 +973,7 @@ class ArtifactAssessment : Basic {
         if (date != null) {
             val index = findIndex(DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentDateExtension(date))
+                this.extension[index] = ArtifactAssessmentDateExtension(date)
             } else {
                 this.addExtension(ArtifactAssessmentDateExtension(date))
             }
@@ -999,7 +985,7 @@ class ArtifactAssessment : Basic {
         if (reviewDate != null) {
             val index = findIndex(LAST_REVIEW_DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentLastReviewDateExtension(reviewDate))
+                this.extension[index] = ArtifactAssessmentLastReviewDateExtension(reviewDate)
             } else {
                 this.addExtension(ArtifactAssessmentLastReviewDateExtension(reviewDate))
             }
@@ -1011,7 +997,7 @@ class ArtifactAssessment : Basic {
         if (approvalDate != null) {
             val index = findIndex(APPROVAL_DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentApprovalDateExtension(approvalDate))
+                this.extension[index] = ArtifactAssessmentApprovalDateExtension(approvalDate)
             } else {
                 this.addExtension(ArtifactAssessmentApprovalDateExtension(approvalDate))
             }
@@ -1023,7 +1009,7 @@ class ArtifactAssessment : Basic {
         if (title != null) {
             val index = findIndex(TITLE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentTitleExtension(title))
+                this.extension[index] = ArtifactAssessmentTitleExtension(title)
             } else {
                 this.addExtension(ArtifactAssessmentTitleExtension(title))
             }
@@ -1035,7 +1021,7 @@ class ArtifactAssessment : Basic {
         if (copyright != null) {
             val index = findIndex(COPYRIGHT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentCopyrightExtension(copyright))
+                this.extension[index] = ArtifactAssessmentCopyrightExtension(copyright)
             } else {
                 this.addExtension(ArtifactAssessmentCopyrightExtension(copyright))
             }
@@ -1047,7 +1033,7 @@ class ArtifactAssessment : Basic {
         if (citeAs != null) {
             val index = findIndex(CITEAS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentCiteAsExtension(citeAs))
+                this.extension[index] = ArtifactAssessmentCiteAsExtension(citeAs)
             } else {
                 this.addExtension(ArtifactAssessmentCiteAsExtension(citeAs))
             }
@@ -1059,7 +1045,7 @@ class ArtifactAssessment : Basic {
         if (citeAs != null) {
             val index = findIndex(CITEAS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentCiteAsExtension(citeAs))
+                this.extension[index] = ArtifactAssessmentCiteAsExtension(citeAs)
             } else {
                 this.addExtension(ArtifactAssessmentCiteAsExtension(citeAs))
             }
@@ -1073,7 +1059,7 @@ class ArtifactAssessment : Basic {
         if (status != null) {
             val index = findIndex(WORKFLOW_STATUS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentWorkflowStatusExtension(status))
+                this.extension[index] = ArtifactAssessmentWorkflowStatusExtension(status)
             } else {
                 this.addExtension(ArtifactAssessmentWorkflowStatusExtension(status))
             }
@@ -1087,7 +1073,7 @@ class ArtifactAssessment : Basic {
         if (status != null) {
             val index = findIndex(DISPOSITION, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, ArtifactAssessmentDispositionExtension(status))
+                this.extension[index] = ArtifactAssessmentDispositionExtension(status)
             } else {
                 this.addExtension(ArtifactAssessmentDispositionExtension(status))
             }
@@ -1106,10 +1092,8 @@ class ArtifactAssessment : Basic {
             if (infoType != null) {
                 val index = findIndex(INFOTYPE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(
-                        index,
-                        ArtifactAssessmentContentInformationTypeExtension(infoType),
-                    )
+                    this.extension[index] =
+                        ArtifactAssessmentContentInformationTypeExtension(infoType)
                 } else {
                     this.addExtension(ArtifactAssessmentContentInformationTypeExtension(infoType))
                 }
@@ -1121,7 +1105,7 @@ class ArtifactAssessment : Basic {
             if (summary != null) {
                 val index = findIndex(SUMMARY, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, ArtifactAssessmentContentSummaryExtension(summary))
+                    this.extension[index] = ArtifactAssessmentContentSummaryExtension(summary)
                 } else {
                     this.addExtension(ArtifactAssessmentContentSummaryExtension(summary))
                 }
@@ -1136,7 +1120,7 @@ class ArtifactAssessment : Basic {
             if (reference != null) {
                 val newRelatedArtifact = RelatedArtifact()
                 newRelatedArtifact.setType(type)
-                newRelatedArtifact.setResource(Reference(reference.getValue()))
+                newRelatedArtifact.setResource(Reference(reference.value))
                 val index = findIndex(RELATEDARTIFACT, newRelatedArtifact, this.getExtension())
                 if (index == -1) {
                     this.addExtension(
@@ -1160,7 +1144,7 @@ class ArtifactAssessment : Basic {
             if (author != null) {
                 val index = findIndex(AUTHOR, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, ArtifactAssessmentContentAuthorExtension(author))
+                    this.extension[index] = ArtifactAssessmentContentAuthorExtension(author)
                 } else {
                     this.addExtension(ArtifactAssessmentContentAuthorExtension(author))
                 }
@@ -1172,7 +1156,7 @@ class ArtifactAssessment : Basic {
             if (quantity != null) {
                 val index = findIndex(QUANTITY, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, ArtifactAssessmentContentQuantityExtension(quantity))
+                    this.extension[index] = ArtifactAssessmentContentQuantityExtension(quantity)
                 } else {
                     this.addExtension(ArtifactAssessmentContentQuantityExtension(quantity))
                 }
@@ -1184,7 +1168,7 @@ class ArtifactAssessment : Basic {
             if (type != null) {
                 val index = findIndex(TYPE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, ArtifactAssessmentContentTypeExtension(type))
+                    this.extension[index] = ArtifactAssessmentContentTypeExtension(type)
                 } else {
                     this.addExtension(ArtifactAssessmentContentTypeExtension(type))
                 }
@@ -1196,10 +1180,8 @@ class ArtifactAssessment : Basic {
             if (freeToShare != null) {
                 val index = findIndex(FREETOSHARE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(
-                        index,
-                        ArtifactAssessmentContentFreeToShareExtension(freeToShare),
-                    )
+                    this.extension[index] =
+                        ArtifactAssessmentContentFreeToShareExtension(freeToShare)
                 } else {
                     this.addExtension(ArtifactAssessmentContentFreeToShareExtension(freeToShare))
                 }
@@ -1239,9 +1221,7 @@ class ArtifactAssessment : Basic {
         ) : Extension(INFOTYPE) {
             init {
                 // validate code
-                ArtifactAssessmentContentInformationType.Companion.fromCode(
-                    informationTypeCode.getValue()
-                )
+                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.value)
                 this.setValue(informationTypeCode)
             }
         }
@@ -1434,7 +1414,7 @@ class ArtifactAssessment : Basic {
                 existingExtension =
                     extensions.stream().filter { e: Extension? -> e!!.getUrl() == url }.findAny()
             }
-            if (existingExtension.isPresent()) {
+            if (existingExtension.isPresent) {
                 return extensions.indexOf(existingExtension.get())
             } else {
                 return -1

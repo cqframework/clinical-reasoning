@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import kotlin.Pair;
 import org.junit.jupiter.api.Test;
 
 class BuilderTest {
@@ -103,7 +103,7 @@ class BuilderTest {
     @Test
     void bundleBuilderNoTypeThrows() {
         var builder = new BundleBuilder<>(org.hl7.fhir.r4.model.Bundle.class);
-        assertThrows(NullPointerException.class, builder::build);
+        assertThrows(IllegalArgumentException.class, builder::build);
     }
 
     // -- BundleBuilder with profile and identifier --
@@ -113,7 +113,7 @@ class BuilderTest {
         var bundle = new BundleBuilder<>(org.hl7.fhir.r4.model.Bundle.class, "test-id")
                 .withType("COLLECTION")
                 .withProfile("http://example.org/profile")
-                .withIdentifier(new ImmutablePair<>("sys", "val"))
+                .withIdentifier(new Pair<>("sys", "val"))
                 .build();
         assertNotNull(bundle);
         assertTrue(bundle.getMeta().getProfile().stream()
@@ -248,8 +248,8 @@ class BuilderTest {
                 .withStatus("FINAL")
                 .withCode(code)
                 .withEvidenceDetail("detail")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(issue);
         assertTrue(issue.hasExtension());
@@ -264,8 +264,8 @@ class BuilderTest {
                 .withStatus("FINAL")
                 .withCode(code)
                 .withEvidenceDetail("detail")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(issue);
     }
@@ -278,8 +278,8 @@ class BuilderTest {
                 .withStatus("FINAL")
                 .withCode(code)
                 .withEvidenceDetail("detail")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(issue);
     }
@@ -290,8 +290,8 @@ class BuilderTest {
         var section = new CompositionSectionComponentBuilder<>(org.hl7.fhir.r4.model.Composition.SectionComponent.class)
                 .withFocus("MeasureReport/1")
                 .withEntry("entry-1")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(section);
     }
@@ -303,8 +303,8 @@ class BuilderTest {
                         org.hl7.fhir.dstu3.model.Composition.SectionComponent.class)
                 .withFocus("MeasureReport/1")
                 .withEntry("entry-1")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(section);
     }
@@ -315,8 +315,8 @@ class BuilderTest {
         var section = new CompositionSectionComponentBuilder<>(org.hl7.fhir.r5.model.Composition.SectionComponent.class)
                 .withFocus("MeasureReport/1")
                 .withEntry("entry-1")
-                .withExtension(new ImmutablePair<>("http://example.org/ext", extCc))
-                .withModifierExtension(new ImmutablePair<>("http://example.org/mod-ext", extCc))
+                .withExtension(new Pair<>("http://example.org/ext", extCc))
+                .withModifierExtension(new Pair<>("http://example.org/mod-ext", extCc))
                 .build();
         assertNotNull(section);
     }

@@ -409,7 +409,7 @@ object SearchHelper {
         val searchParams =
             if (version == null) Searches.byUrl(url) else Searches.byUrlAndVersion(url, version)
         if (additionalSearchParams != null) {
-            searchParams.putAll(additionalSearchParams)
+            searchParams!!.putAll(additionalSearchParams)
         }
         return searchRepositoryWithPaging(repository, resourceType, searchParams, mutableMapOf())
     }
@@ -457,7 +457,7 @@ object SearchHelper {
         val searchParams =
             if (version == null) Searches.byUrl(url) else Searches.byUrlAndVersion(url, version)
         if (additionalSearchParams != null) {
-            searchParams.putAll(additionalSearchParams)
+            searchParams!!.putAll(additionalSearchParams)
         }
         return searchRepositoryWithPaging(repository, resourceType, searchParams, mutableMapOf())
     }

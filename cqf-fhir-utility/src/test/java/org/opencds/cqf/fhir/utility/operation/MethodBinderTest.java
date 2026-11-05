@@ -99,7 +99,9 @@ class MethodBinderTest {
 
     @Test
     void noAnnotation_throws() {
-        assertThrows(NullPointerException.class, () -> new MethodBinder(methodByName("noAnnotation")));
+        var exception =
+                assertThrows(IllegalArgumentException.class, () -> new MethodBinder(methodByName("noAnnotation")));
+        assertEquals("method must be annotated with @Operation", exception.getMessage());
     }
 
     @Test
@@ -285,7 +287,7 @@ class MethodBinderTest {
         }
 
         var method = MissingOperationAnnotation.class.getDeclaredMethods()[0];
-        var e = assertThrows(NullPointerException.class, () -> new MethodBinder(method));
+        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("must be annotated"));
     }
 }

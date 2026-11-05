@@ -1,0 +1,385 @@
+package org.opencds.cqf.fhir.utility.matcher
+
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.RuntimeSearchParam
+import ca.uhn.fhir.fhirpath.IFhirPath
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.model.primitive.DateTimeDt
+import ca.uhn.fhir.rest.param.*
+import java.util.*
+import org.apache.commons.lang3.NotImplementedException
+import org.hl7.fhir.instance.model.api.*
+
+interface ResourceMatcher {
+    class SPPathKey(private val resourceType: String?, private val resourcePath: String?) {
+        fun path(): String? {
+            return resourcePath
+        }
+
+        override fun hashCode(): Int {
+            val prime = 31
+            var result = 1
+            result = prime * result + (if (resourceType == null) 0 else resourceType.hashCode())
+            result = prime * result + (if (resourcePath == null) 0 else resourcePath.hashCode())
+            return result
+        }
+
+        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+        override fun equals(obj: Any?): Boolean {
+            if (this === obj) return true
+            if (obj == null) return false
+            if (javaClass != obj.javaClass) return false
+            val or = obj as SPPathKey
+            if (resourceType == null) {
+                if (or.resourceType != null) return false
+            } else if (resourceType != or.resourceType) return false
+            if (resourcePath == null) {
+                if (or.resourcePath != null) return false
+            } else if (resourcePath != or.resourcePath) return false
+            return true
+        }
+    }
+
+    val engine: IFhirPath?
+
+    val context: FhirContext
+
+    val pathCache: MutableMap<SPPathKey?, IParsedExpression?>?
+
+    fun addCustomParameter(searchParam: RuntimeSearchParam?)
+
+    val customParameters: MutableMap<String?, RuntimeSearchParam?>?
+
+    // The list here is an OR list. Meaning, if any element matches it's a match
+    fun matches(
+        name: String?,
+        params: MutableList<IQueryParameterType?>?,
+        resource: IBaseResource,
+    ): Boolean {
+        var match = true
+
+        val context = this.context
+        var s = context.getResourceDefinition(resource).getSearchParam(name)
+        if (s == null) {
+            s = this.customParameters!![name]
+        }
+        if (s == null) {
+            throw RuntimeException(
+                "The SearchParameter $name for Resource ${resource.fhirType()} is not supported."
+            )
+        }
+
+        var path = s.path
+
+        // System search parameters...
+        if (path.isEmpty() && name!!.startsWith("_")) {
+            path = name.substring(1)
+        }
+
+        var pathResult: MutableList<IBase>? = null
+        try {
+            val parsed =
+                this.pathCache!!.computeIfAbsent(SPPathKey(resource.fhirType(), path)) {
+                    p: SPPathKey? ->
+                    try {
+                        return@computeIfAbsent this.engine!!.parse(p!!.path())
+                    } catch (e: java.lang.Exception) {
+                        throw java.lang.RuntimeException(
+                            "Parsing SearchParameter $name for Resource ${resource.fhirType()} resulted in an error.",
+                            e,
+                        )
+                    }
+                }!!
+            pathResult = this.engine!!.evaluate(resource, parsed, IBase::class.java)
+        } catch (e: Exception) {
+            throw RuntimeException(
+                "Evaluating SearchParameter $name for Resource ${resource.fhirType()} resulted in an error.",
+                e,
+            )
+        }
+
+        if (pathResult == null || pathResult.isEmpty()) {
+            return false
+        }
+
+        for (param in params!!) {
+            for (r in pathResult) {
+                match = isParamMatchAtPath(param, r)
+
+                if (match) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    private fun isParamMatchAtPath(param: IQueryParameterType?, r: IBase): Boolean {
+        var match: Boolean
+        when (param) {
+            is ReferenceParam -> {
+                match = isMatchReference(param, r)
+            }
+            is DateParam -> {
+                match = isMatchDate(param, r)
+            }
+            is TokenParam -> {
+                // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value
+                // irrespective of
+                // the value of the system property
+                // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or
+                // Identifier.value, and
+                // the value of [system] matches the system property of the Identifier or Coding
+                // [parameter]=|[code]: the value of [code] matches a Coding.code or
+                // Identifier.value,
+                // and the
+                // Coding/Identifier has no system property
+                // [parameter]=[system]|: any element where the value of [system] matches the system
+                // property of the
+                // Identifier or Coding
+                match = applyModifiers(isMatchToken(param, r), param)
+                if (!match) {
+                    val codes = getCodes(r)
+                    match = isMatchCoding(param, r, codes)
+                }
+            }
+            is UriParam -> {
+                match = isMatchUri(param, r)
+            }
+            is StringParam -> {
+                match = isMatchString(param, r)
+            }
+            is CompositeParam<*, *> -> {
+                return isCompositeMatch(param, r)
+            }
+            else -> {
+                throw NotImplementedException(
+                    "Resource matching not implemented for search params of type " +
+                        param!!.javaClass.simpleName
+                )
+            }
+        }
+        return match
+    }
+
+    private fun isCompositeMatch(composite: CompositeParam<*, *>, r: IBase): Boolean {
+        if (r !is ICompositeType) {
+            /*
+             * Composites are AND'd
+             * r is likely a primitive (ie, single DateParam object).
+             * But even if it's "something else", the isMatchDate method should handle it
+             */
+            return isParamMatchAtPath(composite.leftValue, r) &&
+                isParamMatchAtPath(composite.rightValue, r)
+        }
+
+        // DateRange and NumberRange do not share a lot of commonality
+        // so we have to handle them like special cases here
+        if (composite.leftValue is DateParam) {
+            // search bounds
+            var searchStart = composite.leftValue as DateParam
+            var searchEnd = composite.rightValue as DateParam
+            if (searchStart.value.after(searchEnd.value)) {
+                // in case order is mixed
+                searchStart = searchEnd
+                searchEnd = composite.leftValue as DateParam
+            }
+
+            val rangeParam = getDateRange(r)
+            // these values we can assume are in order since we created them
+            val resourceStart = rangeParam.lowerBound
+            val resourceEnd = rangeParam.upperBound
+
+            /*
+             * we have 2 ranges:
+             * The Resource's period (rl -> ru)
+             * The search's period (sl -> su)
+             *
+             * resource (r):  |rs-----------|re
+             * search (s):              |ss-----------|se
+             *
+             * these are overlapping if:
+             * * resourceStart <= searchEnd && searchStart <= resourceEnd
+             *
+             * NB: we write it here as:
+             * searchEnd >= resourceStart && searchStart <= resourceEnd
+             *
+             * This is because the
+             */
+            return isMatchDate(searchEnd, DateTimeDt(resourceStart.value)) &&
+                isMatchDate(searchStart, DateTimeDt(resourceEnd.value))
+        } else {
+            throw NotImplementedException(
+                "Composite matching not implemented for search params of type " +
+                    composite.leftValue.javaClass.simpleName
+            )
+        }
+    }
+
+    fun isMatchReference(param: IQueryParameterType, pathResult: IBase): Boolean {
+        val paramValue = (param as ReferenceParam).value
+        if (pathResult is IBaseReference) {
+            return paramValue == extractReferenceValue(pathResult)
+        } else if (pathResult is IPrimitiveType<*>) {
+            return paramValue == pathResult.valueAsString
+        }
+        throw UnsupportedOperationException(
+            "Expected Reference element, found " + pathResult.javaClass.simpleName
+        )
+    }
+
+    fun isMatchDate(param: DateParam, pathResult: IBase): Boolean {
+        // date, dateTime and instant are PrimitiveType<Date>
+        if (pathResult is IPrimitiveType<*>) {
+            val result: Any? = pathResult.value
+            if (result is Date) {
+                return isDateMatch(param, result)
+            } else {
+                throw UnsupportedOperationException(
+                    "Expected date, found " + pathResult.javaClass.simpleName
+                )
+            }
+        } else {
+            throw UnsupportedOperationException(
+                "Expected element of type date, dateTime, instant, Timing or Period, found " +
+                    pathResult.javaClass.simpleName
+            )
+        }
+    }
+
+    fun isDateMatch(param: DateParam, date: Date): Boolean {
+        val compareDate = param.value
+        if (compareDate == null) {
+            return false
+        }
+
+        when (param.prefix) {
+            ParamPrefixEnum.EQUAL -> {
+                return date == compareDate
+            }
+
+            ParamPrefixEnum.LESSTHAN -> {
+                return date.before(compareDate)
+            }
+
+            ParamPrefixEnum.GREATERTHAN -> {
+                return date.after(compareDate)
+            }
+
+            ParamPrefixEnum.GREATERTHAN_OR_EQUALS -> {
+                return date.after(compareDate) || date == compareDate
+            }
+
+            ParamPrefixEnum.LESSTHAN_OR_EQUALS -> {
+                return date.before(compareDate) || date == compareDate
+            }
+
+            ParamPrefixEnum.NOT_EQUAL -> {
+                return date != compareDate
+            }
+
+            else -> {
+                // ends_before, starts_after, approximate - do not work for single date parameters
+                val msg =
+                    String.format(
+                        "Unsupported DateTime comparison operation %s",
+                        param.prefix.value,
+                    )
+                throw UnsupportedOperationException(msg)
+            }
+        }
+    }
+
+    fun isMatchToken(param: TokenParam, pathResult: IBase?): Boolean {
+        if (param.value == null) {
+            return true
+        }
+
+        if (pathResult is IIdType) {
+            return param.value == pathResult.idPart
+        }
+
+        if (pathResult is IBaseEnumeration<*>) {
+            return param.value == pathResult.valueAsString
+        }
+
+        if (pathResult is IPrimitiveType<*>) {
+            return param.value == pathResult.value
+        }
+
+        return false
+    }
+
+    fun isMatchCoding(param: TokenParam, pathResult: IBase?, codes: List<TokenParam?>?): Boolean {
+        if (codes.isNullOrEmpty()) {
+            return false
+        }
+
+        if (param.modifier == TokenParamModifier.IN) {
+            throw UnsupportedOperationException("In modifier is unsupported")
+        }
+
+        for (c in codes) {
+            val matches =
+                param.value == c!!.value && (param.system == null || param.system == c.system)
+            if (matches) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fun isMatchUri(param: UriParam, pathResult: IBase): Boolean {
+        if (param.value == null) {
+            return false
+        }
+        if (pathResult is IPrimitiveType<*>) {
+            return param.value == pathResult.value
+        }
+        throw UnsupportedOperationException(
+            "Expected element of type url or uri, found " + pathResult.javaClass.simpleName
+        )
+    }
+
+    fun isMatchString(param: StringParam, pathResult: Any): Boolean {
+        if (pathResult is IPrimitiveType<*>) {
+            return param.value == pathResult.value
+        }
+        throw UnsupportedOperationException(
+            "Expected element of type string, found " + pathResult.javaClass.simpleName
+        )
+    }
+
+    fun getDateRange(type: ICompositeType?): DateRangeParam
+
+    fun getCodes(codeElement: IBase?): MutableList<TokenParam?>?
+
+    companion object {
+        private fun applyModifiers(input: Boolean, token: TokenParam): Boolean {
+            if (token.modifier != null && token.modifier != TokenParamModifier.NOT) {
+                throw NotImplementedException(
+                    "Only the NOT modifier is supported on tokens at this time"
+                )
+            }
+            if (token.modifier == TokenParamModifier.NOT) {
+                return !input
+            }
+            return input
+        }
+
+        private fun extractReferenceValue(reference: IBaseReference): String? {
+            if (
+                reference.referenceElement != null &&
+                    !reference.referenceElement.value.isNullOrEmpty()
+            ) {
+                return reference.referenceElement.value
+            } else if (reference.resource != null) {
+                return reference.resource.idElement.value
+            }
+            throw UnsupportedOperationException("No reference found")
+        }
+    }
+}

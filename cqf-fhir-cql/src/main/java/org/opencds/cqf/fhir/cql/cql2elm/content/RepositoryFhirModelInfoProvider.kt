@@ -43,6 +43,7 @@ class RepositoryFhirModelInfoProvider(
         }
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     public override fun getLibrary(modelIdentifier: ModelIdentifier): IBaseResource? {
         val libraryIdentifier = toLibraryIdentifier(modelIdentifier)
 

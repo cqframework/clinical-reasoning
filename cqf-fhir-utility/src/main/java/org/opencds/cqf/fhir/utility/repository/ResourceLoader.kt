@@ -6,7 +6,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.util.*
 import org.apache.commons.io.IOUtils
 import org.hl7.fhir.instance.model.api.IBaseBundle
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -66,7 +65,7 @@ interface ResourceLoader {
         var `is`: InputStream? = null
         try {
             val f = File(location)
-            if (f.isFile()) {
+            if (f.isFile) {
                 `is` = FileInputStream(location)
             } else {
                 `is` = this.relativeClass!!.getResourceAsStream(location)

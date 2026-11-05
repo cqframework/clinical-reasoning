@@ -23,8 +23,7 @@ object Repositories {
     }
 
     private fun createClient(fhirContext: FhirContext, endpoint: IBaseResource?): IGenericClient {
-        val fhirVersion = fhirContext.getVersion().getVersion()
-        return when (fhirVersion) {
+        return when (val fhirVersion = fhirContext.version.version) {
             FhirVersionEnum.DSTU3 ->
                 Clients.forEndpoint(fhirContext, (endpoint as org.hl7.fhir.dstu3.model.Endpoint?)!!)
 
@@ -34,7 +33,7 @@ object Repositories {
                 Clients.forEndpoint(fhirContext, (endpoint as org.hl7.fhir.r5.model.Endpoint?)!!)
             else ->
                 throw IllegalArgumentException(
-                    "unsupported FHIR version: ${fhirVersion!!.getFhirVersionString()}"
+                    "unsupported FHIR version: ${fhirVersion!!.fhirVersionString}"
                 )
         }
     }
@@ -88,14 +87,13 @@ object Repositories {
     }
 
     fun getResourceMatcher(context: FhirContext): ResourceMatcher {
-        val fhirVersion = context.getVersion().getVersion()
-        return when (fhirVersion) {
+        return when (val fhirVersion = context.version.version) {
             FhirVersionEnum.DSTU3 -> ResourceMatcherDSTU3()
             FhirVersionEnum.R4 -> ResourceMatcherR4()
             FhirVersionEnum.R5 -> ResourceMatcherR5()
             else ->
                 throw NotImplementedException(
-                    "Resource matching is not implemented for FHIR version: ${fhirVersion!!.getFhirVersionString()}"
+                    "Resource matching is not implemented for FHIR version: ${fhirVersion!!.fhirVersionString}"
                 )
         }
     }

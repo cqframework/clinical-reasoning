@@ -336,8 +336,8 @@ constructor(
         val resource =
             paths
                 .map { path -> this.cachedReadResource(path!!) }
-                .filter { obj -> obj!!.isPresent }
-                .map { obj -> obj!!.get() }
+                .filter { obj -> obj.isPresent }
+                .map { obj -> obj.get() }
                 .firstOrNull()
 
         if (resource != null) {
@@ -509,7 +509,7 @@ constructor(
                 this.compartmentAssigner.fromId(resourceType.simpleName, id)
             }
 
-        val paths = this.pathResolver.candidates(resourceType, id!!.idPart, assignment!!)
+        val paths = this.pathResolver.candidates(resourceType, id.idPart, assignment!!)
         var deleted = false
         for (path in paths) {
             try {
@@ -566,6 +566,7 @@ constructor(
         builder.setType("searchset")
         if (searchParameters == null || searchParameters.isEmpty) {
             resourceIdMap.values.forEach { theResource -> builder.addCollectionEntry(theResource) }
+            @Suppress("UNCHECKED_CAST")
             return builder.bundle as B?
         }
 
@@ -575,6 +576,7 @@ constructor(
             }
         }
 
+        @Suppress("UNCHECKED_CAST")
         return builder.bundle as B?
     }
 
@@ -654,6 +656,7 @@ constructor(
         headers: MutableMap<String?, String?>?,
     ): B? {
         val version = transaction!!.structureFhirVersionEnum
+        @Suppress("UNCHECKED_CAST")
         val returnBundle = newBundle(version, "transaction-response") as B?
         BundleHelper.getEntry<IBaseBackboneElement>(transaction)
             .forEach(
@@ -749,6 +752,7 @@ constructor(
         val resourceClass =
             fhirContext.getResourceDefinition(resourceType).implementingClass
                 as Class<IBaseResource>
+        @Suppress("UNCHECKED_CAST")
         val bundleClass =
             fhirContext.getResourceDefinition("Bundle").implementingClass as Class<IBaseBundle>
         return this.search(

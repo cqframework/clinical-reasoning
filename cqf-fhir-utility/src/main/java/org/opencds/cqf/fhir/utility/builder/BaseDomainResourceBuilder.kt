@@ -55,6 +55,7 @@ abstract class BaseDomainResourceBuilder<SELF, T : IDomainResource> : BaseResour
     }
 
     override fun self(): SELF {
+        @Suppress("UNCHECKED_CAST")
         return this as SELF
     }
 

@@ -4,9 +4,7 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.rest.annotation.IdParam
 import ca.uhn.fhir.rest.annotation.OperationParam
 import ca.uhn.fhir.util.ParametersUtil
-import com.google.common.base.Preconditions
 import java.lang.reflect.Parameter
-import java.util.*
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.fhir.utility.Parameters.removeParameter
 import org.opencds.cqf.fhir.utility.Resources.clone
@@ -30,16 +28,12 @@ interface ParameterBinder {
 
     fun parameter(): Parameter
 
-    class IdParameterBinder(parameter: Parameter?) : ParameterBinder {
-        private val parameter: Parameter
+    class IdParameterBinder(private val parameter: Parameter) : ParameterBinder {
 
         init {
-            this.parameter =
-                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
-            Preconditions.checkArgument(
-                IIdType::class.java.isAssignableFrom(parameter!!.getType()),
-                "Parameter annotated with @IdParam must be of type IIdType",
-            )
+            require(IIdType::class.java.isAssignableFrom(parameter.type)) {
+                "Parameter annotated with @IdParam must be of type IIdType"
+            }
         }
 
         override fun type(): Type {
@@ -59,31 +53,20 @@ interface ParameterBinder {
         }
     }
 
-    class OperationParameterBinder(parameter: Parameter?, operationParam: OperationParam?) :
-        ParameterBinder {
+    class OperationParameterBinder(
+        private val parameter: Parameter,
+        private val operationParam: OperationParam,
+    ) : ParameterBinder {
         private enum class ParameterClass {
             RESOURCE,
             VALUE,
             LIST,
         }
 
-        private val parameter: Parameter
-        private val operationParam: OperationParam
-        private val parameterClass: ParameterClass
+        private val parameterClass: ParameterClass = Companion.determineParameterClass(parameter)
 
         init {
-            this.parameter =
-                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
-            this.operationParam =
-                Objects.requireNonNull<OperationParam>(
-                    operationParam,
-                    "operationParam can not be null",
-                )
-            Objects.requireNonNull<String?>(
-                operationParam!!.name,
-                "@OperationParam must have a name defined",
-            )
-            this.parameterClass = Companion.determineParameterClass(parameter!!)
+            requireNotNull(operationParam.name) { "@OperationParam must have a name defined" }
         }
 
         override fun type(): Type {
@@ -102,7 +85,7 @@ interface ParameterBinder {
                     "Parameter " + this.name() + " is required but was not provided"
                 }
 
-            val context = FhirContext.forCached(parameters.getStructureFhirVersionEnum())
+            val context = FhirContext.forCached(parameters.structureFhirVersionEnum)
             val terser = context.newTerser()
             val params = ParametersUtil.getNamedParameters(context, parameters, this.name())
             removeParameter(parameters, this.name())
@@ -130,7 +113,7 @@ interface ParameterBinder {
             // For single-valued parameters, this is incorrect
             val parts = terser.getValues(params.get(0), "part")
             require(!(parameterClass != ParameterClass.LIST && !parts.isEmpty())) {
-                "Parameter " + this.name() + " is not the expected type " + parameter.getType()
+                "Parameter " + this.name() + " is not the expected type " + parameter.type
             }
 
             if (parameterClass == ParameterClass.LIST) {
@@ -191,7 +174,7 @@ interface ParameterBinder {
 
             if (parameterClass == ParameterClass.RESOURCE) {
                 require(value == null) {
-                    "Parameter " + this.name() + " is not the expected type " + parameter.getType()
+                    "Parameter " + this.name() + " is not the expected type " + parameter.type
                 }
 
                 require(!(valueResource == null && operationParam.min > 0)) {
@@ -201,7 +184,7 @@ interface ParameterBinder {
 
             if (parameterClass == ParameterClass.VALUE) {
                 require(valueResource == null) {
-                    "Parameter " + this.name() + " is not the expected type " + parameter.getType()
+                    "Parameter " + this.name() + " is not the expected type " + parameter.type
                 }
 
                 require(!(value == null && operationParam.min > 0)) {
@@ -215,13 +198,13 @@ interface ParameterBinder {
             }
 
             try {
-                return this.parameter.getType().cast(returnValue)
+                return this.parameter.type.cast(returnValue)
             } catch (e: ClassCastException) {
                 throw IllegalArgumentException(
                     "Parameter value '" +
                         this.name() +
                         "'' is not of the expected type " +
-                        parameter.getType()
+                        parameter.type
                 )
             }
         }
@@ -232,7 +215,7 @@ interface ParameterBinder {
 
         companion object {
             private fun determineParameterClass(parameter: Parameter): ParameterClass {
-                val type = parameter.getType()
+                val type = parameter.type
                 if (IBaseResource::class.java.isAssignableFrom(type)) {
                     return ParameterClass.RESOURCE
                 } else if (IBaseDatatype::class.java.isAssignableFrom(type)) {
@@ -248,16 +231,12 @@ interface ParameterBinder {
         }
     }
 
-    class ExtraParamBinder(parameter: Parameter?) : ParameterBinder {
-        private val parameter: Parameter
+    class ExtraParamBinder(private val parameter: Parameter) : ParameterBinder {
 
         init {
-            this.parameter =
-                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
-            Preconditions.checkArgument(
-                IBaseParameters::class.java.isAssignableFrom(parameter!!.getType()),
-                "Parameter annotated with @ExtraParams must be of type IBaseParameters",
-            )
+            require(IBaseParameters::class.java.isAssignableFrom(parameter.type)) {
+                "Parameter annotated with @ExtraParams must be of type IBaseParameters"
+            }
         }
 
         override fun type(): Type {

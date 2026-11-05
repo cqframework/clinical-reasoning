@@ -175,6 +175,7 @@ open class Either<L : Any, R : Any> internal constructor(left: L?, right: R?) {
      */
     open fun <T : Any> map(mapRight: Function<in R, out T>): Either<L, T> {
         if (isLeft()) {
+            @Suppress("UNCHECKED_CAST")
             return this as Either<L, T>
         }
 
@@ -191,6 +192,7 @@ open class Either<L : Any, R : Any> internal constructor(left: L?, right: R?) {
      * @return a new Either instance with the right value mapped to a new Either, or the left value
      *   unchanged </T>
      */
+    @Suppress("UNCHECKED_CAST")
     open fun <T : Any> flatMap(flatMapRight: Function<in R, out Either<L, out T>>): Either<L, T> {
         if (isLeft()) {
             return this as Either<L, T>
@@ -263,6 +265,7 @@ open class Either<L : Any, R : Any> internal constructor(left: L?, right: R?) {
         return Optional.empty()
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun equals(obj: Any?): Boolean {
         if (obj is Either<*, *>) {
             return (this.left === obj.left && this.right === obj.right) ||

@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.utility.model
 
 import ca.uhn.fhir.context.FhirVersionEnum
-import java.util.*
+import java.util.EnumMap
 import org.opencds.cqf.cql.engine.fhir.model.*
 
 object FhirModelResolverCache {
@@ -12,9 +12,8 @@ object FhirModelResolverCache {
 
     @JvmStatic
     fun resolverForVersion(
-        fhirVersionEnum: FhirVersionEnum?
+        fhirVersionEnum: FhirVersionEnum
     ): FhirModelResolver<*, *, *, *, *, *, *, *> {
-        Objects.requireNonNull<FhirVersionEnum?>(fhirVersionEnum, "fhirVersionEnum can not be null")
         if (!cache.containsKey(fhirVersionEnum)) {
             val resolver =
                 when (fhirVersionEnum) {
@@ -28,6 +27,6 @@ object FhirModelResolverCache {
             cache[fhirVersionEnum] = resolver
         }
 
-        return cache.get(fhirVersionEnum)!!
+        return cache[fhirVersionEnum]!!
     }
 }

@@ -4,12 +4,9 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.model.api.IQueryParameterType
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.rest.api.MethodOutcome
-import com.google.common.base.Preconditions
 import com.google.common.collect.Multimap
-import java.util.*
+import java.util.Optional
 import java.util.stream.Stream
-import kotlin.Exception
-import kotlin.String
 import org.hl7.fhir.instance.model.api.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,7 +45,6 @@ class ProxyRepository : IRepository {
     }
 
     constructor(data: IRepository, content: IRepository?, terminology: IRepository?) {
-        Preconditions.checkNotNull<IRepository?>(data)
 
         this.data = data
         this.content = if (content == null) this.data else content
@@ -60,9 +56,9 @@ class ProxyRepository : IRepository {
         id: I?,
         headers: MutableMap<String?, String?>?,
     ): T? {
-        if (isTerminologyResource(resourceType.getSimpleName())) {
+        if (isTerminologyResource(resourceType.simpleName)) {
             return terminology.read<T?, I?>(resourceType, id, headers)
-        } else if (isContentResource(resourceType.getSimpleName())) {
+        } else if (isContentResource(resourceType.simpleName)) {
             return content.read<T?, I?>(resourceType, id, headers)
         } else {
             return data!!.read<T?, I?>(resourceType, id, headers)
@@ -105,9 +101,9 @@ class ProxyRepository : IRepository {
         searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
         headers: MutableMap<String?, String?>?,
     ): B? {
-        if (isTerminologyResource(resourceType.getSimpleName())) {
+        if (isTerminologyResource(resourceType.simpleName)) {
             return terminology.search<B?, T?>(bundleType, resourceType, searchParameters, headers)
-        } else if (isContentResource(resourceType.getSimpleName())) {
+        } else if (isContentResource(resourceType.simpleName)) {
             return content.search<B?, T?>(bundleType, resourceType, searchParameters, headers)
         } else {
             return data!!.search<B?, T?>(bundleType, resourceType, searchParameters, headers)
@@ -139,7 +135,7 @@ class ProxyRepository : IRepository {
             // swallow and try next
             logger.debug(
                 "Encountered error attempting to fetch link from repository of type {}: {}",
-                repo.javaClass.getName(),
+                repo.javaClass.name,
                 e.message,
             )
             return Optional.empty()
@@ -148,9 +144,9 @@ class ProxyRepository : IRepository {
 
     private fun hasResourceEntries(bundle: IBaseBundle): kotlin.Boolean {
         val bundleFactory =
-            FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory()
+            FhirContext.forCached(bundle.structureFhirVersionEnum).newBundleFactory()
         bundleFactory.initializeWithBundleResource(bundle)
-        return !bundleFactory.toListOfResources().isEmpty()
+        return bundleFactory.toListOfResources().isNotEmpty()
     }
 
     override fun <C : IBaseConformance> capabilities(
@@ -191,7 +187,7 @@ class ProxyRepository : IRepository {
         returnType: Class<R>?,
         headers: MutableMap<String?, String?>?,
     ): R? {
-        if (isTerminologyResource(resourceType.getSimpleName())) {
+        if (isTerminologyResource(resourceType.simpleName)) {
             return terminology.invoke<R?, P?, T?>(
                 resourceType,
                 name,
@@ -199,7 +195,7 @@ class ProxyRepository : IRepository {
                 returnType,
                 headers,
             )
-        } else if (isContentResource(resourceType.getSimpleName())) {
+        } else if (isContentResource(resourceType.simpleName)) {
             return content.invoke<R?, P?, T?>(resourceType, name, parameters, returnType, headers)
         } else {
             return data!!.invoke<R?, P?, T?>(resourceType, name, parameters, returnType, headers)
@@ -264,11 +260,11 @@ class ProxyRepository : IRepository {
         return data!!.fhirContext()
     }
 
-    private fun isTerminologyResource(type: String?): kotlin.Boolean {
+    private fun isTerminologyResource(type: String?): Boolean {
         return (terminologyResourceSet.contains(type))
     }
 
-    private fun isContentResource(type: String?): kotlin.Boolean {
+    private fun isContentResource(type: String?): Boolean {
         return (contentResourceSet.contains(type))
     }
 

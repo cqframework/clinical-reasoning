@@ -11,10 +11,8 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
 import ca.uhn.fhir.util.BundleBuilder
 import ca.uhn.fhir.util.BundleUtil
-import com.google.common.base.Preconditions
 import com.google.common.collect.Multimap
 import java.util.*
-import java.util.function.Consumer
 import java.util.function.Function
 import java.util.stream.Collectors
 import org.hl7.fhir.instance.model.api.*
@@ -51,7 +49,7 @@ open class InMemoryFhirRepository : IRepository {
                     Collectors.groupingBy(
                         Function { obj: IBaseResource? -> obj!!.fhirType() },
                         Collectors.toMap(
-                            Function { r: IBaseResource? -> r!!.getIdElement().getIdPart() },
+                            Function { r: IBaseResource? -> r!!.idElement.idPart },
                             Function.identity<IBaseResource?>(),
                         ),
                     )
@@ -66,16 +64,17 @@ open class InMemoryFhirRepository : IRepository {
         headers: MutableMap<String?, String?>?,
     ): T? {
         val resources =
-            this.resourceMap.computeIfAbsent(resourceType.getSimpleName()) { x ->
+            this.resourceMap.computeIfAbsent(resourceType.simpleName) { x ->
                 HashMap<String?, IBaseResource?>()
             }
 
-        val resource = resources.get(id!!.idPart)
+        val resource = resources[id!!.idPart]
 
         if (resource == null) {
             throw ResourceNotFoundException(id)
         }
 
+        @Suppress("UNCHECKED_CAST")
         return resource as T
     }
 
@@ -88,12 +87,12 @@ open class InMemoryFhirRepository : IRepository {
                 HashMap<String?, IBaseResource?>()
             }
         var theId = newRandomId<IIdType>(context, resource.fhirType())
-        while (resources.containsKey(theId.getIdPart())) {
-            theId = newRandomId<IIdType>(context, resource.fhirType())
+        while (resources.containsKey(theId.idPart)) {
+            theId = newRandomId(context, resource.fhirType())
         }
         resource.setId(theId)
         val outcome = MethodOutcome(theId, true)
-        resources.put(theId.getIdPart(), resource)
+        resources[theId.idPart] = resource
         return outcome
     }
 
@@ -113,8 +112,8 @@ open class InMemoryFhirRepository : IRepository {
             resourceMap.computeIfAbsent(resource!!.fhirType()) { r: String? ->
                 HashMap<String?, IBaseResource?>()
             }
-        val theId = resource.getIdElement().toUnqualifiedVersionless()
-        val idPart = theId.getIdPart()
+        val theId = resource.idElement.toUnqualifiedVersionless()
+        val idPart = theId.idPart
         val outcome = MethodOutcome(theId, false)
         if (!resources.containsKey(idPart)) {
             outcome.setCreated(true)
@@ -124,7 +123,7 @@ open class InMemoryFhirRepository : IRepository {
                 BundleHelper.resourceToRuntimeSearchParam(resource)
             )
         }
-        resources.put(idPart, resource)
+        resources[idPart] = resource
 
         return outcome
     }
@@ -136,15 +135,13 @@ open class InMemoryFhirRepository : IRepository {
     ): MethodOutcome {
         val outcome = MethodOutcome(id, false)
         val resources =
-            resourceMap.computeIfAbsent(id!!.getResourceType()) { r: String? ->
-                HashMap<String?, IBaseResource?>()
-            }
-        val keyId = id.getIdPart()
+            resourceMap.computeIfAbsent(id!!.resourceType) { HashMap<String?, IBaseResource?>() }
+        val keyId = id.idPart
         if (resources.containsKey(keyId)) {
-            outcome.setResource(resources.get(keyId))
+            outcome.setResource(resources[keyId])
             resources.remove(keyId)
         } else {
-            throw ResourceNotFoundException("Resource not found with id " + id)
+            throw ResourceNotFoundException("Resource not found with id $id")
         }
         return outcome
     }
@@ -162,11 +159,10 @@ open class InMemoryFhirRepository : IRepository {
             }
 
         if (searchParameters == null || searchParameters.isEmpty) {
-            resourceIdMap.values.forEach(
-                Consumer { theResource: IBaseResource -> builder.addCollectionEntry(theResource) }
-            )
+            resourceIdMap.values.forEach { theResource -> builder.addCollectionEntry(theResource) }
             builder.setType("searchset")
-            return builder.getBundle() as B?
+            @Suppress("UNCHECKED_CAST")
+            return builder.bundle as B?
         }
 
         val candidates: MutableCollection<IBaseResource?>?
@@ -180,7 +176,7 @@ open class InMemoryFhirRepository : IRepository {
                 checkNotNull(idQuery)
                 for (query in idQuery) {
                     if (query is TokenParam) {
-                        val r = resourceIdMap.get(query.getValue())
+                        val r = resourceIdMap[query.value]
                         if (r != null) {
                             idResources.add(r)
                         }
@@ -225,7 +221,8 @@ open class InMemoryFhirRepository : IRepository {
         }
 
         builder.setType("searchset")
-        return builder.getBundle() as B?
+        @Suppress("UNCHECKED_CAST")
+        return builder.bundle as B?
     }
 
     override fun <B : IBaseBundle> link(
@@ -249,65 +246,47 @@ open class InMemoryFhirRepository : IRepository {
         transaction: B?,
         headers: MutableMap<String?, String?>?,
     ): B? {
-        val version = transaction!!.getStructureFhirVersionEnum()
+        val version = transaction!!.structureFhirVersionEnum
 
-        val returnBundle = newBundle(version) as B?
-        BundleHelper.getEntry<IBaseBackboneElement>(transaction)
-            .forEach(
-                Consumer { e: IBaseBackboneElement? ->
-                    if (BundleHelper.isEntryRequestPut(version, e!!)) {
-                        val outcome =
-                            this.update<IBaseResource?>(BundleHelper.getEntryResource(version, e))
-                        val location = outcome.getId().getValue()
-                        BundleHelper.addEntry(
-                            returnBundle!!,
-                            newEntryWithResponse(
-                                version,
-                                newResponseWithLocation(version, location),
+        @Suppress("UNCHECKED_CAST") val returnBundle = newBundle(version) as B?
+        BundleHelper.getEntry<IBaseBackboneElement>(transaction).forEach { e ->
+            if (BundleHelper.isEntryRequestPut(version, e!!)) {
+                val outcome = this.update<IBaseResource?>(BundleHelper.getEntryResource(version, e))
+                val location = outcome.id.value
+                BundleHelper.addEntry(
+                    returnBundle!!,
+                    newEntryWithResponse(version, newResponseWithLocation(version, location)),
+                )
+            } else if (BundleHelper.isEntryRequestPost(version, e)) {
+                val outcome = this.create<IBaseResource?>(BundleHelper.getEntryResource(version, e))
+                val location = outcome.id.value
+                BundleHelper.addEntry(
+                    returnBundle!!,
+                    newEntryWithResponse(version, newResponseWithLocation(version, location)),
+                )
+            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                if (BundleHelper.getEntryRequestId(version, e) != null) {
+                    val resourceType =
+                        Canonicals.getResourceType(BundleHelper.getEntryRequestUrl(version, e)!!)
+                    val resourceClass =
+                        this.context.getResourceDefinition(resourceType).implementingClass
+                    val res =
+                        this.delete(
+                            resourceClass,
+                            BundleHelper.getEntryRequestId(version, e)!!.withResourceType(
+                                resourceType
                             ),
                         )
-                    } else if (BundleHelper.isEntryRequestPost(version, e)) {
-                        val outcome =
-                            this.create<IBaseResource?>(BundleHelper.getEntryResource(version, e))
-                        val location = outcome.getId().getValue()
-                        BundleHelper.addEntry(
-                            returnBundle!!,
-                            newEntryWithResponse(
-                                version,
-                                newResponseWithLocation(version, location),
-                            ),
-                        )
-                    } else if (BundleHelper.isEntryRequestDelete(version, e)) {
-                        if (BundleHelper.getEntryRequestId(version, e) != null) {
-                            val resourceType =
-                                Canonicals.getResourceType(
-                                    BundleHelper.getEntryRequestUrl(version, e)!!
-                                )
-                            val resourceClass =
-                                this.context
-                                    .getResourceDefinition(resourceType)
-                                    .getImplementingClass()
-                            val res =
-                                this.delete(
-                                    resourceClass,
-                                    BundleHelper.getEntryRequestId(version, e)!!.withResourceType(
-                                        resourceType
-                                    ),
-                                )
-                            BundleHelper.addEntry(
-                                returnBundle!!,
-                                newEntryWithResource(res.getResource()),
-                            )
-                        } else {
-                            throw ResourceNotFoundException("Trying to delete an entry without id")
-                        }
-                    } else {
-                        throw NotImplementedOperationException(
-                            "Transaction stub only supports PUT, POST or DELETE"
-                        )
-                    }
+                    BundleHelper.addEntry(returnBundle!!, newEntryWithResource(res.resource))
+                } else {
+                    throw ResourceNotFoundException("Trying to delete an entry without id")
                 }
-            )
+            } else {
+                throw NotImplementedOperationException(
+                    "Transaction stub only supports PUT, POST or DELETE"
+                )
+            }
+        }
 
         return returnBundle
     }
@@ -321,10 +300,10 @@ open class InMemoryFhirRepository : IRepository {
         try {
             val result =
                 operationRegistry
-                    .buildInvocationContext(this, name!!)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .execute()
-            return returnType!!.cast(result)
+            return returnType.cast(result)
         } catch (e: BaseServerResponseException) {
             throw e
         } catch (e: Throwable) {
@@ -341,24 +320,20 @@ open class InMemoryFhirRepository : IRepository {
     }
 
     override fun <R : IBaseResource, P : IBaseParameters, T : IBaseResource> invoke(
-        resourceType: Class<T>?,
-        name: String?,
+        resourceType: Class<T>,
+        name: String,
         parameters: P?,
-        returnType: Class<R>?,
-        headers: MutableMap<String?, String?>?,
+        returnType: Class<R>,
+        headers: MutableMap<String?, String?>,
     ): R? {
-        Preconditions.checkNotNull<Class<T>?>(resourceType, "resourceType is required")
-        Preconditions.checkNotNull<String?>(name, "name is required")
-        Preconditions.checkNotNull<Class<R>?>(returnType, "returnType is required")
-        Preconditions.checkNotNull<MutableMap<String?, String?>?>(headers, "headers are required")
         try {
             val result =
                 operationRegistry
-                    .buildInvocationContext(this, name!!)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .resourceType(resourceType)
                     .execute()
-            return returnType!!.cast(result)
+            return returnType.cast(result)
         } catch (e: BaseServerResponseException) {
             throw e
         } catch (e: Throwable) {
@@ -376,33 +351,25 @@ open class InMemoryFhirRepository : IRepository {
     }
 
     override fun <R : IBaseResource, P : IBaseParameters, I : IIdType> invoke(
-        id: I?,
-        name: String?,
+        id: I,
+        name: String,
         parameters: P?,
-        returnType: Class<R>?,
-        headers: MutableMap<String?, String?>?,
+        returnType: Class<R>,
+        headers: MutableMap<String?, String?>,
     ): R? {
-        Preconditions.checkNotNull<I?>(id, "id is required")
-        Preconditions.checkArgument(
-            id!!.hasResourceType(),
-            "resourceType is required for id scoped operations",
-        )
-        Preconditions.checkNotNull<String?>(name, "name is required")
-        Preconditions.checkNotNull<Class<R>?>(returnType, "returnType is required")
-        Preconditions.checkNotNull<MutableMap<String?, String?>?>(headers, "headers are required")
+        require(id.hasResourceType()) { "resourceType is required for id scoped operations" }
+
         try {
             val result =
                 operationRegistry
-                    .buildInvocationContext(this, name!!)
+                    .buildInvocationContext(this, name)
                     .parameters(parameters)
                     .id(id)
                     .resourceType(
-                        this.context
-                            .getResourceDefinition(id.getResourceType())
-                            .getImplementingClass()
+                        this.context.getResourceDefinition(id.resourceType).implementingClass
                     )
                     .execute()
-            return returnType!!.cast(result)
+            return returnType.cast(result)
         } catch (e: BaseServerResponseException) {
             throw e
         } catch (e: Throwable) {
@@ -460,6 +427,6 @@ open class InMemoryFhirRepository : IRepository {
      * @param factory a factory function that will create an instance of the operation class </T>
      */
     fun <T> registerOperation(clazz: Class<T>, factory: Function<IRepository?, T?>) {
-        operationRegistry.register(clazz!!, factory!!)
+        operationRegistry.register(clazz, factory)
     }
 }

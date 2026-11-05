@@ -26,6 +26,7 @@ interface ResourceMatcher {
             return result
         }
 
+        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
         override fun equals(obj: Any?): Boolean {
             if (this === obj) return true
             if (obj == null) return false
@@ -62,7 +63,7 @@ interface ResourceMatcher {
         val context = this.context
         var s = context.getResourceDefinition(resource).getSearchParam(name)
         if (s == null) {
-            s = this.customParameters!!.get(name)
+            s = this.customParameters!![name]
         }
         if (s == null) {
             throw RuntimeException(
@@ -70,7 +71,7 @@ interface ResourceMatcher {
             )
         }
 
-        var path = s.getPath()
+        var path = s.path
 
         // System search parameters...
         if (path.isEmpty() && name!!.startsWith("_")) {
@@ -91,7 +92,7 @@ interface ResourceMatcher {
                         )
                     }
                 }!!
-            pathResult = this.engine!!.evaluate<IBase?>(resource, parsed, IBase::class.java)
+            pathResult = this.engine!!.evaluate(resource, parsed, IBase::class.java)
         } catch (e: Exception) {
             throw RuntimeException(
                 "Evaluating SearchParameter $name for Resource ${resource.fhirType()} resulted in an error.",
@@ -118,39 +119,48 @@ interface ResourceMatcher {
 
     private fun isParamMatchAtPath(param: IQueryParameterType?, r: IBase): Boolean {
         var match: Boolean
-        if (param is ReferenceParam) {
-            match = isMatchReference(param, r)
-        } else if (param is DateParam) {
-            match = isMatchDate(param, r)
-        } else if (param is TokenParam) {
-            // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value
-            // irrespective of
-            // the value of the system property
-            // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or
-            // Identifier.value, and
-            // the value of [system] matches the system property of the Identifier or Coding
-            // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value,
-            // and the
-            // Coding/Identifier has no system property
-            // [parameter]=[system]|: any element where the value of [system] matches the system
-            // property of the
-            // Identifier or Coding
-            match = applyModifiers(isMatchToken(param, r), param)
-            if (!match) {
-                val codes = getCodes(r)
-                match = isMatchCoding(param, r, codes)
+        when (param) {
+            is ReferenceParam -> {
+                match = isMatchReference(param, r)
             }
-        } else if (param is UriParam) {
-            match = isMatchUri(param, r)
-        } else if (param is StringParam) {
-            match = isMatchString(param, r)
-        } else if (param is CompositeParam<*, *>) {
-            return isCompositeMatch(param, r)
-        } else {
-            throw NotImplementedException(
-                "Resource matching not implemented for search params of type " +
-                    param!!.javaClass.getSimpleName()
-            )
+            is DateParam -> {
+                match = isMatchDate(param, r)
+            }
+            is TokenParam -> {
+                // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value
+                // irrespective of
+                // the value of the system property
+                // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or
+                // Identifier.value, and
+                // the value of [system] matches the system property of the Identifier or Coding
+                // [parameter]=|[code]: the value of [code] matches a Coding.code or
+                // Identifier.value,
+                // and the
+                // Coding/Identifier has no system property
+                // [parameter]=[system]|: any element where the value of [system] matches the system
+                // property of the
+                // Identifier or Coding
+                match = applyModifiers(isMatchToken(param, r), param)
+                if (!match) {
+                    val codes = getCodes(r)
+                    match = isMatchCoding(param, r, codes)
+                }
+            }
+            is UriParam -> {
+                match = isMatchUri(param, r)
+            }
+            is StringParam -> {
+                match = isMatchString(param, r)
+            }
+            is CompositeParam<*, *> -> {
+                return isCompositeMatch(param, r)
+            }
+            else -> {
+                throw NotImplementedException(
+                    "Resource matching not implemented for search params of type " +
+                        param!!.javaClass.simpleName
+                )
+            }
         }
         return match
     }
@@ -172,7 +182,7 @@ interface ResourceMatcher {
             // search bounds
             var searchStart = composite.getLeftValue() as DateParam
             var searchEnd = composite.getRightValue() as DateParam
-            if (searchStart.getValue().after(searchEnd.getValue())) {
+            if (searchStart.value.after(searchEnd.value)) {
                 // in case order is mixed
                 searchStart = searchEnd
                 searchEnd = composite.getLeftValue() as DateParam
@@ -180,8 +190,8 @@ interface ResourceMatcher {
 
             val rangeParam = getDateRange(r)
             // these values we can assume are in order since we created them
-            val resourceStart = rangeParam.getLowerBound()
-            val resourceEnd = rangeParam.getUpperBound()
+            val resourceStart = rangeParam.lowerBound
+            val resourceEnd = rangeParam.upperBound
 
             /*
              * we have 2 ranges:
@@ -199,25 +209,25 @@ interface ResourceMatcher {
              *
              * This is because the
              */
-            return isMatchDate(searchEnd, DateTimeDt(resourceStart.getValue())) &&
-                isMatchDate(searchStart, DateTimeDt(resourceEnd.getValue()))
+            return isMatchDate(searchEnd, DateTimeDt(resourceStart.value)) &&
+                isMatchDate(searchStart, DateTimeDt(resourceEnd.value))
         } else {
             throw NotImplementedException(
                 "Composite matching not implemented for search params of type " +
-                    composite.getLeftValue().javaClass.getSimpleName()
+                    composite.getLeftValue().javaClass.simpleName
             )
         }
     }
 
     fun isMatchReference(param: IQueryParameterType, pathResult: IBase): Boolean {
-        val paramValue = (param as ReferenceParam).getValue()
+        val paramValue = (param as ReferenceParam).value
         if (pathResult is IBaseReference) {
             return paramValue == extractReferenceValue(pathResult)
         } else if (pathResult is IPrimitiveType<*>) {
-            return paramValue == pathResult.getValueAsString()
+            return paramValue == pathResult.valueAsString
         }
         throw UnsupportedOperationException(
-            "Expected Reference element, found " + pathResult.javaClass.getSimpleName()
+            "Expected Reference element, found " + pathResult.javaClass.simpleName
         )
     }
 
@@ -229,24 +239,24 @@ interface ResourceMatcher {
                 return isDateMatch(param, result)
             } else {
                 throw UnsupportedOperationException(
-                    "Expected date, found " + pathResult.javaClass.getSimpleName()
+                    "Expected date, found " + pathResult.javaClass.simpleName
                 )
             }
         } else {
             throw UnsupportedOperationException(
                 "Expected element of type date, dateTime, instant, Timing or Period, found " +
-                    pathResult.javaClass.getSimpleName()
+                    pathResult.javaClass.simpleName
             )
         }
     }
 
     fun isDateMatch(param: DateParam, date: Date): Boolean {
-        val compareDate = param.getValue()
+        val compareDate = param.value
         if (compareDate == null) {
             return false
         }
 
-        when (param.getPrefix()) {
+        when (param.prefix) {
             ParamPrefixEnum.EQUAL -> {
                 return date == compareDate
             }
@@ -276,7 +286,7 @@ interface ResourceMatcher {
                 val msg =
                     String.format(
                         "Unsupported DateTime comparison operation %s",
-                        param.getPrefix().getValue(),
+                        param.prefix.value,
                     )
                 throw UnsupportedOperationException(msg)
             }
@@ -284,42 +294,37 @@ interface ResourceMatcher {
     }
 
     fun isMatchToken(param: TokenParam, pathResult: IBase?): Boolean {
-        if (param.getValue() == null) {
+        if (param.value == null) {
             return true
         }
 
         if (pathResult is IIdType) {
-            return param.getValue() == pathResult.getIdPart()
+            return param.value == pathResult.idPart
         }
 
         if (pathResult is IBaseEnumeration<*>) {
-            return param.getValue() == pathResult.getValueAsString()
+            return param.value == pathResult.valueAsString
         }
 
         if (pathResult is IPrimitiveType<*>) {
-            return param.getValue() == pathResult.getValue()
+            return param.value == pathResult.getValue()
         }
 
         return false
     }
 
-    fun isMatchCoding(
-        param: TokenParam,
-        pathResult: IBase?,
-        codes: MutableList<TokenParam?>?,
-    ): Boolean {
-        if (codes == null || codes.isEmpty()) {
+    fun isMatchCoding(param: TokenParam, pathResult: IBase?, codes: List<TokenParam?>?): Boolean {
+        if (codes.isNullOrEmpty()) {
             return false
         }
 
-        if (param.getModifier() == TokenParamModifier.IN) {
+        if (param.modifier == TokenParamModifier.IN) {
             throw UnsupportedOperationException("In modifier is unsupported")
         }
 
         for (c in codes) {
             val matches =
-                param.getValue() == c!!.getValue() &&
-                    (param.getSystem() == null || param.getSystem() == c.getSystem())
+                param.value == c!!.value && (param.system == null || param.system == c.system)
             if (matches) {
                 return true
             }
@@ -329,23 +334,23 @@ interface ResourceMatcher {
     }
 
     fun isMatchUri(param: UriParam, pathResult: IBase): Boolean {
-        if (param.getValue() == null) {
+        if (param.value == null) {
             return false
         }
         if (pathResult is IPrimitiveType<*>) {
-            return param.getValue() == pathResult.getValue()
+            return param.value == pathResult.getValue()
         }
         throw UnsupportedOperationException(
-            "Expected element of type url or uri, found " + pathResult.javaClass.getSimpleName()
+            "Expected element of type url or uri, found " + pathResult.javaClass.simpleName
         )
     }
 
     fun isMatchString(param: StringParam, pathResult: Any): Boolean {
         if (pathResult is IPrimitiveType<*>) {
-            return param.getValue() == pathResult.getValue()
+            return param.value == pathResult.getValue()
         }
         throw UnsupportedOperationException(
-            "Expected element of type string, found " + pathResult.javaClass.getSimpleName()
+            "Expected element of type string, found " + pathResult.javaClass.simpleName
         )
     }
 
@@ -355,12 +360,12 @@ interface ResourceMatcher {
 
     companion object {
         private fun applyModifiers(input: Boolean, token: TokenParam): Boolean {
-            if (token.getModifier() != null && token.getModifier() != TokenParamModifier.NOT) {
+            if (token.modifier != null && token.modifier != TokenParamModifier.NOT) {
                 throw NotImplementedException(
                     "Only the NOT modifier is supported on tokens at this time"
                 )
             }
-            if (token.getModifier() == TokenParamModifier.NOT) {
+            if (token.modifier == TokenParamModifier.NOT) {
                 return !input
             }
             return input
@@ -368,12 +373,12 @@ interface ResourceMatcher {
 
         private fun extractReferenceValue(reference: IBaseReference): String? {
             if (
-                reference.getReferenceElement() != null &&
-                    !StringUtils.isEmpty(reference.getReferenceElement().getValue())
+                reference.referenceElement != null &&
+                    !StringUtils.isEmpty(reference.referenceElement.value)
             ) {
-                return reference.getReferenceElement().getValue()
-            } else if (reference.getResource() != null) {
-                return reference.getResource().getIdElement().getValue()
+                return reference.referenceElement.value
+            } else if (reference.resource != null) {
+                return reference.resource.idElement.value
             }
             throw UnsupportedOperationException("No reference found")
         }

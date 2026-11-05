@@ -52,7 +52,7 @@ class RepositoryOperationProvider(
         operationName: String?,
         parameters: IBaseParameters?,
     ): R? {
-        val paramMap = operationParametersParser.getParameterParts(parameters)
+        val paramMap = operationParametersParser.getParameterParts(parameters!!)
         when (resourceType) {
             activityDef ->
                 return invokeActivityDefinition<IPrimitiveType<String?>, R>(
@@ -66,11 +66,12 @@ class RepositoryOperationProvider(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     protected fun <C : IPrimitiveType<String?>, R : IBaseResource> invokeActivityDefinition(
         repository: IRepository?,
         id: IIdType?,
         operationName: String?,
-        paramMap: MutableMap<String?, Any?>?,
+        paramMap: Map<String?, Any?>?,
     ): R? {
         requireNotNull(activityDefinitionProcessorFactory) {
             noFactoryError(activityDef, operationName)
@@ -79,7 +80,7 @@ class RepositoryOperationProvider(
         when (operationName) {
             "\$apply" -> {
                 val activityDefinition =
-                    Eithers.for3<C, IIdType, R>(
+                    Eithers.for3(
                         paramMap!![APPLY_PARAMETER_CANONICAL] as C?,
                         id,
                         paramMap[APPLY_PARAMETER_ACTIVITY_DEFINITION] as R?,
@@ -97,17 +98,17 @@ class RepositoryOperationProvider(
                     if (encounter == null) null else encounter.getValue(),
                     if (practitioner == null) null else practitioner.getValue(),
                     if (organization == null) null else organization.getValue(),
-                    paramMap.get(APPLY_PARAMETER_USER_TYPE) as IBaseDatatype?,
-                    paramMap.get(APPLY_PARAMETER_USER_LANGUAGE) as IBaseDatatype?,
-                    paramMap.get(APPLY_PARAMETER_USER_TASK_CONTEXT) as IBaseDatatype?,
-                    paramMap.get(APPLY_PARAMETER_SETTING) as IBaseDatatype?,
-                    paramMap.get(APPLY_PARAMETER_SETTING_CONTEXT) as IBaseDatatype?,
-                    paramMap.get(APPLY_PARAMETER_PARAMETERS) as IBaseParameters?,
-                    (paramMap.get(APPLY_PARAMETER_USE_SERVER_DATA) as kotlin.Boolean?)!!,
-                    paramMap.get(APPLY_PARAMETER_DATA) as IBaseBundle?,
-                    paramMap.get(APPLY_PARAMETER_DATA_ENDPOINT) as IBaseResource?,
-                    paramMap.get(APPLY_PARAMETER_CONTENT_ENDPOINT) as IBaseResource?,
-                    paramMap.get(APPLY_PARAMETER_TERMINOLOGY_ENDPOINT) as IBaseResource?,
+                    paramMap[APPLY_PARAMETER_USER_TYPE] as IBaseDatatype?,
+                    paramMap[APPLY_PARAMETER_USER_LANGUAGE] as IBaseDatatype?,
+                    paramMap[APPLY_PARAMETER_USER_TASK_CONTEXT] as IBaseDatatype?,
+                    paramMap[APPLY_PARAMETER_SETTING] as IBaseDatatype?,
+                    paramMap[APPLY_PARAMETER_SETTING_CONTEXT] as IBaseDatatype?,
+                    paramMap[APPLY_PARAMETER_PARAMETERS] as IBaseParameters?,
+                    (paramMap[APPLY_PARAMETER_USE_SERVER_DATA] as kotlin.Boolean?)!!,
+                    paramMap[APPLY_PARAMETER_DATA] as IBaseBundle?,
+                    paramMap[APPLY_PARAMETER_DATA_ENDPOINT] as IBaseResource?,
+                    paramMap[APPLY_PARAMETER_CONTENT_ENDPOINT] as IBaseResource?,
+                    paramMap[APPLY_PARAMETER_TERMINOLOGY_ENDPOINT] as IBaseResource?,
                 ) as R?
             }
 
@@ -115,11 +116,12 @@ class RepositoryOperationProvider(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     protected fun <C : IPrimitiveType<String?>, R : IBaseResource> invokePlanDefinition(
         repository: IRepository?,
         id: IIdType?,
         operationName: String,
-        paramMap: MutableMap<String?, Any?>,
+        paramMap: Map<String?, Any?>,
     ): R? {
         requireNotNull(planDefinitionProcessorFactory) { noFactoryError(planDef, operationName) }
         val processor = planDefinitionProcessorFactory.create(repository)
@@ -217,7 +219,7 @@ class RepositoryOperationProvider(
         repository: IRepository?,
         id: IIdType?,
         operationName: String,
-        paramMap: MutableMap<String?, Any?>?,
+        paramMap: Map<String?, Any?>?,
     ): R? {
         requireNotNull(questionnaireProcessorFactory) {
             noFactoryError(questionnaire, operationName)

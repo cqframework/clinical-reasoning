@@ -10,6 +10,7 @@ interface ResourceCreator : FhirContextUser {
 
         val newResource = this.fhirContext.getResourceDefinition(id.resourceType).newInstance()
         newResource.setId(id)
+        @Suppress("UNCHECKED_CAST")
         return newResource as T
     }
 
@@ -22,10 +23,12 @@ interface ResourceCreator : FhirContextUser {
     }
 
     fun <T : IBaseResource> newResource(resourceClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
         return this.fhirContext.getResourceDefinition(resourceClass).newInstance() as T
     }
 
     fun <T : IBaseResource> newResource(resourceType: String): T {
+        @Suppress("UNCHECKED_CAST")
         return this.fhirContext.getResourceDefinition(resourceType).newInstance() as T
     }
 }

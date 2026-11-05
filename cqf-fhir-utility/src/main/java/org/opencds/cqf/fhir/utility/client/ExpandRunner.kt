@@ -80,7 +80,7 @@ class ExpandRunner(
             expansionAttempt++
             if (expansionAttempt <= terminologyServerClientSettings.maxRetryCount) {
                 val id = buildResourceIdForExpand(valueSetUrl)
-                val terminologyServerBase = fhirClient.getServerBase()
+                val terminologyServerBase = fhirClient.serverBase
                 val fullExpandUrl = "$terminologyServerBase/$id/\$expand"
 
                 // Compute the request parameters for THIS attempt. Depending on the configured
@@ -163,7 +163,7 @@ class ExpandRunner(
         } catch (ex: Exception) {
             val isTransient: Boolean = isTransient(ex)
             val id = buildResourceIdForExpand(valueSetUrl)
-            val terminologyServerBase = fhirClient.getServerBase()
+            val terminologyServerBase = fhirClient.serverBase
             val fullExpandUrl = "$terminologyServerBase/$id/\$expand"
             val parametersLog = formatParametersForLogging(parameters)
 
@@ -223,14 +223,14 @@ class ExpandRunner(
         val version = getVersion(canonicalUrl)
 
         // Check if this is a VSAC URL by looking for cts.nlm.nih.gov
-        val isVsac = canonicalUrl != null && canonicalUrl.contains("cts.nlm.nih.gov")
+        val isVsac = canonicalUrl.contains("cts.nlm.nih.gov")
 
         if (version != null && isVsac) {
             // VSAC requires version appended with dash: "ValueSet/id-version"
-            return resourceType + "/" + idPart + "-" + version
+            return "$resourceType/$idPart-$version"
         } else {
             // Standard format: "ValueSet/id"
-            return resourceType + "/" + idPart
+            return "$resourceType/$idPart"
         }
     }
 
@@ -258,11 +258,7 @@ class ExpandRunner(
     }
 
     private val valueSetClass: Class<IBaseResource>
-        get() =
-            getClassForTypeAndVersion<IBaseResource>(
-                "ValueSet",
-                fhirClient.fhirContext.version.version,
-            )
+        get() = getClassForTypeAndVersion("ValueSet", fhirClient.fhirContext.version.version)
 
     /**
      * Formats Parameters for logging - extracts parameter names and values for debugging. Returns a
@@ -358,11 +354,8 @@ class ExpandRunner(
             }
             return (createAdapterForResource(parameters) as IParametersAdapter)
                 .parameter!!
-                .stream()
-                .filter { p: IParametersParameterComponentAdapter? ->
-                    Constants.TX_RESOURCE == p!!.name
-                }
-                .count()
+                .count { p -> Constants.TX_RESOURCE == p!!.name }
+                .toLong()
         }
 
         private fun isTransient(ex: Exception?): Boolean {

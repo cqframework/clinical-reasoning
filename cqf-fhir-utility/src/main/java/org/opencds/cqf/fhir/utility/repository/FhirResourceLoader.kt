@@ -3,7 +3,8 @@ package org.opencds.cqf.fhir.utility.repository
 import ca.uhn.fhir.context.FhirContext
 import java.io.File
 import java.nio.file.Path
-import java.util.*
+import java.util.Arrays
+import java.util.Optional
 import java.util.function.Supplier
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.opencds.cqf.fhir.utility.repository.ig.CqlContent.loadCqlContent
@@ -19,15 +20,10 @@ class FhirResourceLoader(
     init {
         this.resources =
             directoryList
-                .stream()
-                .map<String?> { relativePath: String? ->
-                    this.getDirectoryOrFileLocation(relativePath!!)
-                }
-                .filter { x: String? -> x != null }
-                .map<MutableList<String?>?> { x: String? -> this.getFilePaths(x!!, recursive) }
-                .flatMap<String?> { obj: MutableList<String?>? -> obj!!.stream() }
-                .map<IBaseResource?> { location: String? -> this.loadTestResources(location!!) }
-                .toList()
+                .mapNotNull { relativePath -> this.getDirectoryOrFileLocation(relativePath!!) }
+                .flatMap { x -> this.getFilePaths(x, recursive) }
+                .map { location -> this.loadTestResources(location!!) }
+                .toMutableList()
     }
 
     override val relativeClass: Class<*>
@@ -54,7 +50,7 @@ class FhirResourceLoader(
         val filePaths = ArrayList<String?>()
         val inputDir = File(directoryPath)
         val files =
-            if (inputDir.isDirectory())
+            if (inputDir.isDirectory)
                 ArrayList<File>(
                     Arrays.asList<File?>(
                         *Optional.ofNullable<Array<File?>?>(inputDir.listFiles())
@@ -66,12 +62,12 @@ class FhirResourceLoader(
             else ArrayList<File?>()
 
         for (file in files) {
-            if (file.isDirectory()) {
+            if (file.isDirectory) {
                 if (recursive) {
-                    filePaths.addAll(getFilePaths(file.getPath(), recursive))
+                    filePaths.addAll(getFilePaths(file.path, recursive))
                 }
             } else {
-                if (!file.getPath().endsWith(".cql")) filePaths.add(file.getPath())
+                if (!file.path.endsWith(".cql")) filePaths.add(file.path)
             }
         }
         return filePaths
@@ -80,7 +76,7 @@ class FhirResourceLoader(
     private fun loadTestResources(location: String): IBaseResource? {
         val path = Path.of(location)
         val resource = readResource(fhirContext!!, location)
-        loadCqlContent(resource, path.getParent())
+        loadCqlContent(resource, path.parent)
         return resource
     }
 }

@@ -44,6 +44,7 @@ object SearchHelper {
         searchParameters: MutableMap<String?, MutableList<IQueryParameterType?>?>?,
         headers: MutableMap<String?, String?>?,
     ): Bundle {
+        @Suppress("DEPRECATION")
         val result =
             repository.search<Bundle, T>(
                 Bundle::class.java,

@@ -6,7 +6,6 @@ import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.rest.api.MethodOutcome
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
 import ca.uhn.fhir.util.BundleBuilder
-import ca.uhn.fhir.util.bundle.BundleEntryParts
 import com.google.common.collect.Multimap
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -19,13 +18,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 // wip
-class FederatedRepository(private val local: IRepository, vararg repositories: IRepository?) :
+class FederatedRepository(private val local: IRepository, vararg repositories: IRepository) :
     IRepository {
-    private val repositoryList: MutableList<IRepository>
-
-    init {
-        repositoryList = Arrays.asList<IRepository?>(*repositories)
-    }
+    private val repositoryList: MutableList<IRepository> = repositories.toMutableList()
 
     override fun <T : IBaseResource, I : IIdType> read(
         resourceType: Class<T>?,
@@ -101,9 +96,8 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         val results = mutableListOf<T?>()
         val bundle = repository.search(bundleType, resourceType, searchParameters, headers)
         val iterator = BundleIterator(repository, bundle)
-        iterator.forEachRemaining(
-            Consumer { b: BundleEntryParts? -> results.add(b!!.getResource() as T?) }
-        )
+        @Suppress("UNCHECKED_CAST")
+        iterator.forEachRemaining { b -> results.add(b!!.resource as T?) }
         return results
     }
 
@@ -138,10 +132,8 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         )
 
         futureList
-            .stream()
-            .map<MutableList<T?>?> { obj: CompletableFuture<MutableList<T?>?>? -> obj!!.join() }
-            .flatMap<T?> { obj: MutableList<T?>? -> obj!!.stream() }
-            .forEach { theResource: T? -> builder.addCollectionEntry(theResource) }
+            .flatMap { obj -> obj!!.join()!! }
+            .forEach { theResource -> builder.addCollectionEntry(theResource) }
         builder.setType("searchset")
 
         return builder.getBundleTyped<B?>()
@@ -183,7 +175,7 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         val bundleFactory =
             FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory()
         bundleFactory.initializeWithBundleResource(bundle)
-        return !bundleFactory.toListOfResources().isEmpty()
+        return bundleFactory.toListOfResources().isNotEmpty()
     }
 
     override fun <C : IBaseConformance> capabilities(

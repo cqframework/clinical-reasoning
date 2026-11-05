@@ -129,7 +129,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         val result = super.search(bundleType, resourceType, searchParameters, headers)
 
         if (
-            !BundleHelper.getEntry<IBaseBackboneElement>(result!!).isEmpty() ||
+            BundleHelper.getEntry<IBaseBackboneElement>(result!!).isNotEmpty() ||
                 dependsOnPackages.isEmpty()
         ) {
             return result
@@ -250,7 +250,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
     ) {
         val loaded: MutableSet<String?> = HashSet<String?>()
         val toLoad: Queue<Array<String?>?> = LinkedList<Array<String?>?>(dependsOnPackages)
-        while (!toLoad.isEmpty()) {
+        while (toLoad.isNotEmpty()) {
             val pkgInfo = toLoad.poll()
             if (pkgInfo == null || pkgInfo.size < 2) {
                 continue

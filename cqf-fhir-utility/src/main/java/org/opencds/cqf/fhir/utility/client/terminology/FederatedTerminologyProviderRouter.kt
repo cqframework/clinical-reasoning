@@ -207,6 +207,7 @@ constructor(
         return getClient(endpoint!!.address).getR4TerminologyCapabilities(endpoint)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun getTerminologyServerClientSettings(
         endpoint: IEndpointAdapter?
     ): TerminologyServerClientSettings? {

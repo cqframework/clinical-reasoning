@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.utility.r4
 
-import com.google.common.base.Preconditions
-import java.util.stream.Collectors
 import org.hl7.fhir.instance.model.api.IIdType
 import org.hl7.fhir.r4.model.*
 import org.hl7.fhir.r4.model.Parameters
@@ -17,11 +15,7 @@ object Parameters {
      * @return parameters
      */
     @JvmStatic
-    fun parameters(
-        id: IdType?,
-        vararg parts: Parameters.ParametersParameterComponent?,
-    ): Parameters {
-        Preconditions.checkNotNull<IdType?>(id)
+    fun parameters(id: IdType, vararg parts: Parameters.ParametersParameterComponent?): Parameters {
         val p = parameters(*parts)
         p.setId(id)
         return p
@@ -36,12 +30,11 @@ object Parameters {
      */
     @JvmStatic
     fun parameters(
-        idPart: String?,
+        idPart: String,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters {
-        Preconditions.checkNotNull<String?>(idPart)
         return parameters(
-            Ids.newId<Parameters, IIdType>(Parameters::class.java, idPart!!) as IdType,
+            Ids.newId<Parameters, IIdType>(Parameters::class.java, idPart) as IdType,
             *parts,
         )
     }
@@ -70,10 +63,9 @@ object Parameters {
      */
     @JvmStatic
     fun part(
-        name: String?,
+        name: String,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
-        Preconditions.checkNotNull<String?>(name)
         val c = Parameters.ParametersParameterComponent()
         c.setName(name)
         for (p in parts) {
@@ -92,12 +84,10 @@ object Parameters {
      */
     @JvmStatic
     fun part(
-        name: String?,
-        value: String?,
+        name: String,
+        value: String,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
-        Preconditions.checkNotNull<String?>(name)
-        Preconditions.checkNotNull<String?>(value)
         val c = part(name, *parts)
         c.setValue(StringType(value))
         return c
@@ -113,12 +103,10 @@ object Parameters {
      */
     @JvmStatic
     fun part(
-        name: String?,
-        value: Type?,
+        name: String,
+        value: Type,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
-        Preconditions.checkNotNull<String?>(name)
-        Preconditions.checkNotNull<Type?>(value)
         val c = part(name, *parts)
         c.setValue(value)
         return c
@@ -134,12 +122,10 @@ object Parameters {
      */
     @JvmStatic
     fun part(
-        name: String?,
-        resource: Resource?,
+        name: String,
+        resource: Resource,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
-        Preconditions.checkNotNull<String?>(name)
-        Preconditions.checkNotNull<Resource?>(resource)
         val c = part(name, *parts)
         c.setResource(resource)
         return c
@@ -154,16 +140,10 @@ object Parameters {
      */
     @JvmStatic
     fun getPartsByName(
-        parameters: Parameters?,
-        name: String?,
+        parameters: Parameters,
+        name: String,
     ): MutableList<Parameters.ParametersParameterComponent?> {
-        Preconditions.checkNotNull<Parameters?>(parameters)
-        Preconditions.checkNotNull<String?>(name)
-        return parameters!!
-            .getParameter()
-            .stream()
-            .filter { x: Parameters.ParametersParameterComponent? -> name == x!!.getName() }
-            .collect(Collectors.toList())
+        return parameters.getParameter().filter { x -> name == x!!.getName() }.toMutableList()
     }
 
     /**
@@ -176,7 +156,7 @@ object Parameters {
      */
     @JvmStatic
     fun base64BinaryPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -193,7 +173,7 @@ object Parameters {
      */
     @JvmStatic
     fun booleanPart(
-        name: String?,
+        name: String,
         value: Boolean,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -210,7 +190,7 @@ object Parameters {
      */
     @JvmStatic
     fun canonicalPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -227,7 +207,7 @@ object Parameters {
      */
     @JvmStatic
     fun codePart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -244,7 +224,7 @@ object Parameters {
      */
     @JvmStatic
     fun datePart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -261,7 +241,7 @@ object Parameters {
      */
     @JvmStatic
     fun dateTimePart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -278,7 +258,7 @@ object Parameters {
      */
     @JvmStatic
     fun decimalPart(
-        name: String?,
+        name: String,
         value: Double,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -295,7 +275,7 @@ object Parameters {
      */
     @JvmStatic
     fun idPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -312,7 +292,7 @@ object Parameters {
      */
     @JvmStatic
     fun instantPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -329,7 +309,7 @@ object Parameters {
      */
     @JvmStatic
     fun integerPart(
-        name: String?,
+        name: String,
         value: Int,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -346,7 +326,7 @@ object Parameters {
      */
     @JvmStatic
     fun markdownPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -363,7 +343,7 @@ object Parameters {
      */
     @JvmStatic
     fun oidPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -380,7 +360,7 @@ object Parameters {
      */
     @JvmStatic
     fun positiveIntPart(
-        name: String?,
+        name: String,
         value: Int,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -397,7 +377,7 @@ object Parameters {
      */
     @JvmStatic
     fun stringPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -414,7 +394,7 @@ object Parameters {
      */
     @JvmStatic
     fun timePart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -431,7 +411,7 @@ object Parameters {
      */
     @JvmStatic
     fun unsignedIntPart(
-        name: String?,
+        name: String,
         value: Int,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -448,7 +428,7 @@ object Parameters {
      */
     @JvmStatic
     fun uriPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -465,7 +445,7 @@ object Parameters {
      */
     @JvmStatic
     fun urlPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {
@@ -482,7 +462,7 @@ object Parameters {
      */
     @JvmStatic
     fun uuidPart(
-        name: String?,
+        name: String,
         value: String?,
         vararg parts: Parameters.ParametersParameterComponent?,
     ): Parameters.ParametersParameterComponent {

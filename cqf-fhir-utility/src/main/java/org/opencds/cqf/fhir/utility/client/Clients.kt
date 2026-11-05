@@ -8,13 +8,9 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor
-import com.google.common.base.Preconditions
 import java.nio.charset.StandardCharsets
 import java.util.*
-import java.util.stream.Collectors
-import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.dstu3.model.Endpoint
-import org.hl7.fhir.dstu3.model.StringType
 
 /**
  * This class provides utility functions for creating IGenericClients and setting up authentication
@@ -110,9 +106,8 @@ object Clients {
             val headerList =
                 endpoint
                     .getHeader()
-                    .stream()
-                    .map<String?> { headerString: StringType? -> headerString!!.asStringValue() }
-                    .collect(Collectors.toList())
+                    .map { headerString -> headerString!!.asStringValue() }
+                    .toMutableList()
             registerHeaders(client, headerList)
         }
         return client
@@ -228,12 +223,11 @@ object Clients {
      * @param password the password
      */
     @JvmStatic
-    fun registerBasicAuth(client: IGenericClient?, username: String?, password: String?) {
-        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
+    fun registerBasicAuth(client: IGenericClient, username: String?, password: String?) {
 
         if (username != null) {
             val authInterceptor = BasicAuthInterceptor(username, password)
-            client!!.registerInterceptor(authInterceptor)
+            client.registerInterceptor(authInterceptor)
         }
     }
 
@@ -243,36 +237,29 @@ object Clients {
      * @param client the client to register BearerToken authentication on
      * @param token the bearer token to register
      */
-    fun registerBearerTokenAuth(client: IGenericClient?, token: String?) {
-        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
+    fun registerBearerTokenAuth(client: IGenericClient, token: String?) {
 
         if (token != null) {
             val authInterceptor = BearerTokenAuthInterceptor(token)
-            client!!.registerInterceptor(authInterceptor)
+            client.registerInterceptor(authInterceptor)
         }
     }
 
     @JvmStatic
     fun registerAdditionalRequestHeadersAuth(
-        client: IGenericClient?,
+        client: IGenericClient,
         username: String?,
         apiKey: String?,
     ) {
-        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
 
         if (username != null && apiKey != null) {
             val authString =
-                StringUtils.join<String?>(
-                    "Basic ",
+                "Basic " +
                     Base64.getEncoder()
-                        .encodeToString(
-                            StringUtils.join<String?>(username, ":", apiKey)
-                                .toByteArray(StandardCharsets.UTF_8)
-                        ),
-                )
+                        .encodeToString("$username:$apiKey".toByteArray(StandardCharsets.UTF_8))
             val authInterceptor = AdditionalRequestHeadersInterceptor()
             authInterceptor.addHeaderValue("Authorization", authString)
-            client!!.registerInterceptor(authInterceptor)
+            client.registerInterceptor(authInterceptor)
         }
     }
 

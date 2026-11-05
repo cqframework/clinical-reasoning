@@ -84,7 +84,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
                 if (category == ResourceCategory.TERMINOLOGY) {
                     if (
                         conventions.categoryLayout == CategoryLayout.DEFINITIONAL_AND_DATA &&
-                            base == bases!![0]
+                            base == bases[0]
                     ) {
                         paths.add(basePath.resolve(EXTERNAL_DIRECTORY))
                     } else if (conventions.categoryLayout != CategoryLayout.DEFINITIONAL_AND_DATA) {
@@ -178,7 +178,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     private fun categoryDirectories(category: ResourceCategory?): MutableList<String?>? {
         val map: MutableMap<ResourceCategory?, MutableList<String?>?> =
             BASE_DIRECTORIES.rowMap()[conventions.categoryLayout]!!
-        check(!(map == null || !map.containsKey(category))) {
+        check(map.containsKey(category)) {
             ("No base directories configured for category " +
                 category +
                 " with layout " +

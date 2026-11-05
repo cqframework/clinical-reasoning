@@ -273,7 +273,7 @@ object Searches {
 
         fun getValues(): Multimap<String?, MutableList<IQueryParameterType?>?> {
             if (values == null) {
-                values = ArrayListMultimap.create<String?, MutableList<IQueryParameterType?>?>()
+                values = ArrayListMultimap.create()
             }
 
             return values!!

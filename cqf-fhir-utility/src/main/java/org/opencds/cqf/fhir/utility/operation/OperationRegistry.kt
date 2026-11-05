@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException
 import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder
 import java.lang.reflect.InvocationTargetException
-import java.util.*
 import java.util.function.Function
 import org.hl7.fhir.instance.model.api.IBaseParameters
 import org.hl7.fhir.instance.model.api.IBaseResource
@@ -56,22 +55,22 @@ class OperationRegistry {
         }
 
         fun scope(): Scope {
-            if (id != null) {
-                return Scope.INSTANCE
+            return if (id != null) {
+                Scope.INSTANCE
             } else if (resourceType != null) {
-                return Scope.TYPE
+                Scope.TYPE
             } else {
-                return Scope.SERVER
+                Scope.SERVER
             }
         }
 
         fun typeName(): String? {
-            if (resourceType != null) {
-                return resourceType!!.simpleName
+            return if (resourceType != null) {
+                resourceType!!.simpleName
             } else if (id != null) {
-                return id!!.resourceType
+                id!!.resourceType
             } else {
-                return ""
+                ""
             }
         }
 
@@ -126,12 +125,8 @@ class OperationRegistry {
     }
 
     @Throws(Exception::class)
-    fun execute(params: OperationInvocationParams?): IBaseResource? {
-        Objects.requireNonNull<OperationInvocationParams?>(
-            params,
-            "Operation invocation parameters cannot be null",
-        )
-        val context = findInvocationContext(params!!.scope(), params.name(), params.typeName()!!)
+    fun execute(params: OperationInvocationParams): IBaseResource? {
+        val context = findInvocationContext(params.scope(), params.name(), params.typeName()!!)
 
         val instance: Any? = context.factory().apply(params.repository())
         val callable = context.methodBinder().bind(instance, params.id(), params.parameters())

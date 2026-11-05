@@ -323,13 +323,16 @@ class Either3<L : Any, M : Any, R : Any> internal constructor(left: L?, middle: 
     }
 
     protected fun <T : Any> narrow(wide: Either3<L, M, out T>): Either3<L, M, T> {
+        @Suppress("UNCHECKED_CAST")
         return wide as Either3<L, M, T>
     }
 
     protected fun <T : Any> propagate(): Either3<L, M, T> {
+        @Suppress("UNCHECKED_CAST")
         return this as Either3<L, M, T>
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun equals(obj: Any?): Boolean {
         if (obj is Either3<*, *, *>) {
             return (this.left === obj.left &&

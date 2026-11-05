@@ -36,21 +36,19 @@ class ArtifactAssessment : Basic {
         /** added to help the parsers with the generic types */
         NULL;
 
-        fun toCode(): String? {
+        fun toCode() =
             when (this) {
-                COMMENT -> return "comment"
-                CLASSIFIER -> return "classifier"
-                RATING -> return "rating"
-                CONTAINER -> return "container"
-                RESPONSE -> return "response"
-                CHANGEREQUEST -> return "change-request"
-                NULL -> return null
-                else -> return "?"
+                COMMENT -> "comment"
+                CLASSIFIER -> "classifier"
+                RATING -> "rating"
+                CONTAINER -> "container"
+                RESPONSE -> "response"
+                CHANGEREQUEST -> "change-request"
+                NULL -> null
             }
-        }
 
-        val system: String?
-            get() {
+        val system
+            get() =
                 when (this) {
                     COMMENT,
                     CLASSIFIER,
@@ -58,39 +56,34 @@ class ArtifactAssessment : Basic {
                     CONTAINER,
                     RESPONSE,
                     CHANGEREQUEST ->
-                        return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type"
-                    NULL -> return null
-                    else -> return "?"
-                }
-            }
+                        "http://hl7.org/fhir/ValueSet/artifactassessment-information-type"
 
-        val definition: String?
-            get() {
-                when (this) {
-                    COMMENT -> return "A comment on the artifact."
-                    CLASSIFIER -> return "A classifier of the artifact."
-                    RATING -> return "A rating  of the artifact."
-                    CONTAINER -> return "A container for multiple components."
-                    RESPONSE -> return "A response to a comment."
-                    CHANGEREQUEST -> return "A change request for the artifact."
-                    NULL -> return null
-                    else -> return "?"
+                    NULL -> null
                 }
-            }
 
-        val display: String?
-            get() {
+        val definition
+            get() =
                 when (this) {
-                    COMMENT -> return "Comment"
-                    CLASSIFIER -> return "Classifier"
-                    RATING -> return "Rating"
-                    CONTAINER -> return "Container"
-                    RESPONSE -> return "Response"
-                    CHANGEREQUEST -> return "Change Request"
-                    NULL -> return null
-                    else -> return "?"
+                    COMMENT -> "A comment on the artifact."
+                    CLASSIFIER -> "A classifier of the artifact."
+                    RATING -> "A rating  of the artifact."
+                    CONTAINER -> "A container for multiple components."
+                    RESPONSE -> "A response to a comment."
+                    CHANGEREQUEST -> "A change request for the artifact."
+                    NULL -> null
                 }
-            }
+
+        val display
+            get() =
+                when (this) {
+                    COMMENT -> "Comment"
+                    CLASSIFIER -> "Classifier"
+                    RATING -> "Rating"
+                    CONTAINER -> "Container"
+                    RESPONSE -> "Response"
+                    CHANGEREQUEST -> "Change Request"
+                    NULL -> null
+                }
 
         companion object {
             @JvmStatic
@@ -198,31 +191,29 @@ class ArtifactAssessment : Basic {
         /** added to help the parsers with the generic types */
         NULL;
 
-        fun toCode(): String? {
+        fun toCode() =
             when (this) {
-                HIGH -> return "high"
-                MODERATE -> return "moderate"
-                LOW -> return "low"
-                VERY_LOW -> return "very-low"
-                NO_CONCERN -> return "no-concern"
-                SERIOUS_CONCERN -> return "serious-concern"
-                VERY_SERIOUS_CONCERN -> return "very-serious-concern"
-                EXTREMELY_SERIOUS_CONCERN -> return "extremely-serious-concern"
-                PRESENT -> return "present"
-                ABSENT -> return "absent"
-                NO_CHANGE -> return "no-change"
-                DOWNCODE1 -> return "downcode1"
-                DOWNCODE2 -> return "downcode2"
-                DOWNCODE3 -> return "downcode3"
-                UPCODE1 -> return "upcode1"
-                UPCODE2 -> return "upcode2"
-                NULL -> return null
-                else -> return "?"
+                HIGH -> "high"
+                MODERATE -> "moderate"
+                LOW -> "low"
+                VERY_LOW -> "very-low"
+                NO_CONCERN -> "no-concern"
+                SERIOUS_CONCERN -> "serious-concern"
+                VERY_SERIOUS_CONCERN -> "very-serious-concern"
+                EXTREMELY_SERIOUS_CONCERN -> "extremely-serious-concern"
+                PRESENT -> "present"
+                ABSENT -> "absent"
+                NO_CHANGE -> "no-change"
+                DOWNCODE1 -> "downcode1"
+                DOWNCODE2 -> "downcode2"
+                DOWNCODE3 -> "downcode3"
+                UPCODE1 -> "upcode1"
+                UPCODE2 -> "upcode2"
+                NULL -> null
             }
-        }
 
-        val system: String?
-            get() {
+        val system
+            get() =
                 when (this) {
                     HIGH,
                     MODERATE,
@@ -239,62 +230,56 @@ class ArtifactAssessment : Basic {
                     DOWNCODE2,
                     DOWNCODE3,
                     UPCODE1,
-                    UPCODE2 -> return "http://terminology.hl7.org/CodeSystem/certainty-rating"
+                    UPCODE2 -> "http://terminology.hl7.org/CodeSystem/certainty-rating"
 
-                    NULL -> return null
-                    else -> return "?"
+                    NULL -> null
                 }
-            }
 
-        val definition: String?
-            get() {
+        val definition
+            get() =
                 when (this) {
-                    HIGH -> return "High quality evidence."
-                    MODERATE -> return "Moderate quality evidence."
-                    LOW -> return "Low quality evidence."
-                    VERY_LOW -> return "Very low quality evidence."
-                    NO_CONCERN -> return "No serious concern."
-                    SERIOUS_CONCERN -> return "Serious concern."
-                    VERY_SERIOUS_CONCERN -> return "Very serious concern."
-                    EXTREMELY_SERIOUS_CONCERN -> return "Extremely serious concern."
+                    HIGH -> "High quality evidence."
+                    MODERATE -> "Moderate quality evidence."
+                    LOW -> "Low quality evidence."
+                    VERY_LOW -> "Very low quality evidence."
+                    NO_CONCERN -> "No serious concern."
+                    SERIOUS_CONCERN -> "Serious concern."
+                    VERY_SERIOUS_CONCERN -> "Very serious concern."
+                    EXTREMELY_SERIOUS_CONCERN -> "Extremely serious concern."
                     PRESENT ->
-                        return "Possible reason for increasing quality rating was checked and found to be present."
+                        "Possible reason for increasing quality rating was checked and found to be present."
                     ABSENT ->
-                        return "Possible reason for increasing quality rating was checked and found to be absent."
-                    NO_CHANGE -> return "No change to quality rating."
-                    DOWNCODE1 -> return "Reduce quality rating by 1."
-                    DOWNCODE2 -> return "Reduce quality rating by 2."
-                    DOWNCODE3 -> return "Reduce quality rating by 3."
-                    UPCODE1 -> return "Increase quality rating by 1."
-                    UPCODE2 -> return "Increase quality rating by 2."
-                    NULL -> return null
-                    else -> return "?"
+                        "Possible reason for increasing quality rating was checked and found to be absent."
+                    NO_CHANGE -> "No change to quality rating."
+                    DOWNCODE1 -> "Reduce quality rating by 1."
+                    DOWNCODE2 -> "Reduce quality rating by 2."
+                    DOWNCODE3 -> "Reduce quality rating by 3."
+                    UPCODE1 -> "Increase quality rating by 1."
+                    UPCODE2 -> "Increase quality rating by 2."
+                    NULL -> null
                 }
-            }
 
-        val display: String?
-            get() {
+        val display
+            get() =
                 when (this) {
-                    HIGH -> return "High quality"
-                    MODERATE -> return "Moderate quality"
-                    LOW -> return "Low quality"
-                    VERY_LOW -> return "Very low quality"
-                    NO_CONCERN -> return "No serious concern"
-                    SERIOUS_CONCERN -> return "Serious concern"
-                    VERY_SERIOUS_CONCERN -> return "Very serious concern"
-                    EXTREMELY_SERIOUS_CONCERN -> return "Extremely serious concern"
-                    PRESENT -> return "Present"
-                    ABSENT -> return "Absent"
-                    NO_CHANGE -> return "No change to rating"
-                    DOWNCODE1 -> return "Reduce rating: -1"
-                    DOWNCODE2 -> return "Reduce rating: -2"
-                    DOWNCODE3 -> return "Reduce rating: -3"
-                    UPCODE1 -> return "Increase rating: +1"
-                    UPCODE2 -> return "Increase rating: +2"
-                    NULL -> return null
-                    else -> return "?"
+                    HIGH -> "High quality"
+                    MODERATE -> "Moderate quality"
+                    LOW -> "Low quality"
+                    VERY_LOW -> "Very low quality"
+                    NO_CONCERN -> "No serious concern"
+                    SERIOUS_CONCERN -> "Serious concern"
+                    VERY_SERIOUS_CONCERN -> "Very serious concern"
+                    EXTREMELY_SERIOUS_CONCERN -> "Extremely serious concern"
+                    PRESENT -> "Present"
+                    ABSENT -> "Absent"
+                    NO_CHANGE -> "No change to rating"
+                    DOWNCODE1 -> "Reduce rating: -1"
+                    DOWNCODE2 -> "Reduce rating: -2"
+                    DOWNCODE3 -> "Reduce rating: -3"
+                    UPCODE1 -> "Increase rating: +1"
+                    UPCODE2 -> "Increase rating: +2"
+                    NULL -> null
                 }
-            }
 
         companion object {
             @JvmStatic
@@ -410,70 +395,64 @@ class ArtifactAssessment : Basic {
         /** added to help the parsers with the generic types */
         NULL;
 
-        fun toCode(): String {
+        fun toCode() =
             when (this) {
-                SUBMITTED -> return "submitted"
-                TRIAGED -> return "triaged"
-                WAITINGFORINPUT -> return "waiting-for-input"
-                RESOLVEDNOCHANGE -> return "resolved-no-change"
-                RESOLVEDCHANGEREQUIRED -> return "resolved-change-required"
-                DEFERRED -> return "deferred"
-                DUPLICATE -> return "duplicate"
-                APPLIED -> return "applied"
-                PUBLISHED -> return "published"
-                else -> return "?"
+                SUBMITTED -> "submitted"
+                TRIAGED -> "triaged"
+                WAITINGFORINPUT -> "waiting-for-input"
+                RESOLVEDNOCHANGE -> "resolved-no-change"
+                RESOLVEDCHANGEREQUIRED -> "resolved-change-required"
+                DEFERRED -> "deferred"
+                DUPLICATE -> "duplicate"
+                APPLIED -> "applied"
+                PUBLISHED -> "published"
+                else -> "?"
             }
-        }
 
-        val system: String
-            get() {
+        val system
+            get() =
                 if (this == NULL) {
-                    return "?"
+                    "?"
                 } else {
-                    return "http://hl7.org/fhir/artifactassessment-workflow-status"
+                    "http://hl7.org/fhir/artifactassessment-workflow-status"
                 }
-            }
 
-        val definition: String
-            get() {
+        val definition
+            get() =
                 when (this) {
                     SUBMITTED ->
-                        return "The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken."
+                        "The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken."
                     TRIAGED ->
-                        return "The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment."
+                        "The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment."
                     WAITINGFORINPUT ->
-                        return "The comment is waiting for input from a specific party before next steps can be taken."
+                        "The comment is waiting for input from a specific party before next steps can be taken."
                     RESOLVEDNOCHANGE ->
-                        return "The comment has been resolved and no changes resulted from the resolution"
+                        "The comment has been resolved and no changes resulted from the resolution"
                     RESOLVEDCHANGEREQUIRED ->
-                        return "The comment has been resolved and changes are required to address the comment"
+                        "The comment has been resolved and changes are required to address the comment"
                     DEFERRED ->
-                        return "The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred"
-                    DUPLICATE ->
-                        return "The comment is a duplicate of another comment already received"
-                    APPLIED ->
-                        return "The comment is resolved and any necessary changes have been applied"
+                        "The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred"
+                    DUPLICATE -> "The comment is a duplicate of another comment already received"
+                    APPLIED -> "The comment is resolved and any necessary changes have been applied"
                     PUBLISHED ->
-                        return "The necessary changes to the artifact have been published in a new version of the artifact"
-                    else -> return "?"
+                        "The necessary changes to the artifact have been published in a new version of the artifact"
+                    else -> "?"
                 }
-            }
 
-        val display: String
-            get() {
+        val display
+            get() =
                 when (this) {
-                    SUBMITTED -> return "Submitted"
-                    TRIAGED -> return "Triaged"
-                    WAITINGFORINPUT -> return "Waiting for Input"
-                    RESOLVEDNOCHANGE -> return "Resolved - No Change"
-                    RESOLVEDCHANGEREQUIRED -> return "Resolved - Change Required"
-                    DEFERRED -> return "Deferred"
-                    DUPLICATE -> return "Duplicate"
-                    APPLIED -> return "Applied"
-                    PUBLISHED -> return "Published"
-                    else -> return "?"
+                    SUBMITTED -> "Submitted"
+                    TRIAGED -> "Triaged"
+                    WAITINGFORINPUT -> "Waiting for Input"
+                    RESOLVEDNOCHANGE -> "Resolved - No Change"
+                    RESOLVEDCHANGEREQUIRED -> "Resolved - Change Required"
+                    DEFERRED -> "Deferred"
+                    DUPLICATE -> "Duplicate"
+                    APPLIED -> "Applied"
+                    PUBLISHED -> "Published"
+                    else -> "?"
                 }
-            }
 
         companion object {
             @JvmStatic
@@ -557,16 +536,15 @@ class ArtifactAssessment : Basic {
         /** added to help the parsers with the generic types */
         NULL;
 
-        fun toCode(): String {
+        fun toCode() =
             when (this) {
-                UNRESOLVED -> return "unresolved"
-                NOTPERSUASIVE -> return "not-persuasive"
-                PERSUASIVE -> return "persuasive"
-                PERSUASIVEWITHMODIFICATION -> return "persuasive-with-modification"
-                NOTPERSUASIVEWITHMODIFICATION -> return "not-persuasive-with-modification"
-                else -> return "?"
+                UNRESOLVED -> "unresolved"
+                NOTPERSUASIVE -> "not-persuasive"
+                PERSUASIVE -> "persuasive"
+                PERSUASIVEWITHMODIFICATION -> "persuasive-with-modification"
+                NOTPERSUASIVEWITHMODIFICATION -> "not-persuasive-with-modification"
+                else -> "?"
             }
-        }
 
         val system: String
             get() {
@@ -577,31 +555,31 @@ class ArtifactAssessment : Basic {
                 }
             }
 
-        val definition: String
-            get() {
+        val definition
+            get() =
                 when (this) {
-                    UNRESOLVED -> return "The comment is unresolved"
-                    NOTPERSUASIVE -> return "The comment is not persuasive (rejected in full)"
-                    PERSUASIVE -> return "The comment is persuasive (accepted in full)"
+                    UNRESOLVED -> "The comment is unresolved"
+                    NOTPERSUASIVE -> "The comment is not persuasive (rejected in full)"
+                    PERSUASIVE -> "The comment is persuasive (accepted in full)"
                     PERSUASIVEWITHMODIFICATION ->
-                        return "The comment is persuasive with modification (partially accepted)"
-                    NOTPERSUASIVEWITHMODIFICATION ->
-                        return "The comment is not persuasive with modification (partially rejected)"
-                    else -> return "?"
-                }
-            }
+                        "The comment is persuasive with modification (partially accepted)"
 
-        val display: String
-            get() {
-                when (this) {
-                    UNRESOLVED -> return "Unresolved"
-                    NOTPERSUASIVE -> return "Not Persuasive"
-                    PERSUASIVE -> return "Persuasive"
-                    PERSUASIVEWITHMODIFICATION -> return "Persuasive with Modification"
-                    NOTPERSUASIVEWITHMODIFICATION -> return "Not Persuasive with Modification"
-                    else -> return "?"
+                    NOTPERSUASIVEWITHMODIFICATION ->
+                        "The comment is not persuasive with modification (partially rejected)"
+
+                    else -> "?"
                 }
-            }
+
+        val display
+            get() =
+                when (this) {
+                    UNRESOLVED -> "Unresolved"
+                    NOTPERSUASIVE -> "Not Persuasive"
+                    PERSUASIVE -> "Persuasive"
+                    PERSUASIVEWITHMODIFICATION -> "Persuasive with Modification"
+                    NOTPERSUASIVEWITHMODIFICATION -> "Not Persuasive with Modification"
+                    else -> "?"
+                }
 
         companion object {
             @JvmStatic
@@ -1309,6 +1287,7 @@ class ArtifactAssessment : Basic {
         private inner class ArtifactAssessmentContentTypeExtension(typeConcept: CodeableConcept?) :
             Extension(TYPE, typeConcept) {
             @Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-type")
+            @Suppress("PROPERTY_HIDES_JAVA_FIELD")
             protected var value: CodeableConcept? = null
         }
 
@@ -1321,6 +1300,7 @@ class ArtifactAssessment : Basic {
             classifierConcept: CodeableConcept?
         ) : Extension(CLASSIFIER, classifierConcept) {
             @Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-rating")
+            @Suppress("PROPERTY_HIDES_JAVA_FIELD")
             protected var value: CodeableConcept? = null
         }
 

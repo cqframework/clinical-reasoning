@@ -8,8 +8,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient
 import ca.uhn.fhir.rest.gclient.*
 import ca.uhn.fhir.util.ParametersUtil
 import com.google.common.collect.Multimap
-import java.util.*
-import java.util.function.Consumer
+import java.util.Date
 import org.hl7.fhir.instance.model.api.*
 
 class RestRepository(protected val client: IGenericClient) : IRepository {
@@ -43,7 +42,7 @@ class RestRepository(protected val client: IGenericClient) : IRepository {
         resource: T?,
         headers: MutableMap<String?, String?>?,
     ): MethodOutcome? {
-        val op = this.client.update().resource(resource).withId(resource!!.getIdElement())
+        val op = this.client.update().resource(resource).withId(resource!!.idElement)
         return this.addHeaders<IUpdateExecutable?>(op, headers)!!.execute()
     }
 
@@ -66,26 +65,13 @@ class RestRepository(protected val client: IGenericClient) : IRepository {
         if (searchParameters != null) {
             for (key in searchParameters.keySet()) {
                 val flattenLists =
-                    searchParameters
-                        .get(key)
-                        .stream()
-                        .flatMap<IQueryParameterType?> { obj: MutableList<IQueryParameterType?>? ->
-                            obj!!.stream()
-                        }
-                        .toList()
+                    searchParameters.get(key).flatMap { obj -> obj!! }.toMutableList()
 
-                params.put(key, flattenLists)
+                params[key] = flattenLists
             }
-            searchParameters
-                .entries()
-                .forEach(
-                    Consumer {
-                        p: MutableMap.MutableEntry<String?, MutableList<IQueryParameterType?>?>? ->
-                        params.put(p!!.key, p.value)
-                    }
-                )
+            searchParameters.entries().forEach { p -> params[p!!.key] = p.value }
         }
-        return search(bundleType, resourceType, params, mutableMapOf<String?, String?>())
+        return search(bundleType, resourceType, params, mutableMapOf())
     }
 
     override fun <B : IBaseBundle, T : IBaseResource> search(
@@ -267,23 +253,23 @@ class RestRepository(protected val client: IGenericClient) : IRepository {
     }
 
     override fun fhirContext(): FhirContext {
-        return this.client.getFhirContext()
+        return this.client.fhirContext
     }
 
     protected fun <B : IBaseBundle, P : IBaseParameters> addHistoryParams(
         operation: IHistoryTyped<B?>?,
         parameters: P?,
     ) {
-        val ctx = this.client.getFhirContext()
+        val ctx = this.client.fhirContext
         val count = ParametersUtil.getNamedParameterValuesAsInteger(ctx, parameters, "_count")
-        if (count != null && !count.isEmpty()) {
-            operation!!.count(count.get(0))
+        if (!count.isNullOrEmpty()) {
+            operation!!.count(count[0])
         }
 
         // TODO: Figure out how to handle date ranges for the _at parameter
         val since = ParametersUtil.getNamedParameter(ctx, parameters, "_since")
-        if (since.isPresent()) {
-            operation!!.since(since.get() as IPrimitiveType<Date?>)
+        if (since.isPresent) {
+            @Suppress("UNCHECKED_CAST") operation!!.since(since.get() as IPrimitiveType<Date?>)
         }
     }
 

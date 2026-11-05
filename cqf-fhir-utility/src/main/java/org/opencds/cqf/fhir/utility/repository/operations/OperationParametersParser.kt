@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.repository.operations
 
-import java.util.*
 import java.util.stream.Collectors
 import org.hl7.fhir.instance.model.api.IBase
 import org.hl7.fhir.instance.model.api.IBaseDatatype
@@ -10,29 +9,19 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 
 /** This class maps the standard input parameters of an Operation to key, value pairs. */
-class OperationParametersParser(adapterFactory: IAdapterFactory) {
-    protected var adapterFactory: IAdapterFactory
+class OperationParametersParser(protected var adapterFactory: IAdapterFactory) {
 
     // protected FhirTypeConverter fhirTypeConverter;
     init {
-        Objects.requireNonNull<IAdapterFactory?>(adapterFactory, "adapterFactory must not be null")
         // requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");
-        this.adapterFactory = adapterFactory
         // this.fhirTypeConverter = fhirTypeConverter;
     }
 
-    fun addResourceChild(parameters: IBaseParameters?, name: String?, resource: IBaseResource?) {
-        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
-        Objects.requireNonNull<String?>(name, "name must not be null")
-        val parametersAdapter = this.adapterFactory.createParameters(parameters!!)
+    fun addResourceChild(parameters: IBaseParameters, name: String, resource: IBaseResource?) {
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
         val parts = parametersAdapter.parameter
 
-        var part =
-            parts!!
-                .stream()
-                .filter { x: IParametersParameterComponentAdapter? -> x!!.name == name }
-                .findFirst()
-                .orElse(null)
+        var part = parts!!.firstOrNull { x -> x!!.name == name }
         if (part == null) {
             part = parametersAdapter.addParameter()
         }
@@ -42,18 +31,11 @@ class OperationParametersParser(adapterFactory: IAdapterFactory) {
         part.setValue(null)
     }
 
-    fun addValueChild(parameters: IBaseParameters?, name: String?, value: IBaseDatatype?) {
-        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
-        Objects.requireNonNull<String?>(name, "name must not be null")
-        val parametersAdapter = this.adapterFactory.createParameters(parameters!!)
+    fun addValueChild(parameters: IBaseParameters, name: String, value: IBaseDatatype?) {
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
         val parts = parametersAdapter.parameter
 
-        var part =
-            parts!!
-                .stream()
-                .filter { x: IParametersParameterComponentAdapter? -> x!!.name == name }
-                .findFirst()
-                .orElse(null)
+        var part = parts!!.firstOrNull { x -> x!!.name == name }
         if (part == null) {
             part = parametersAdapter.addParameter()
         }
@@ -78,7 +60,6 @@ class OperationParametersParser(adapterFactory: IAdapterFactory) {
         if (parameters == null) {
             return null
         }
-        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
         val parametersAdapter = this.adapterFactory.createParameters(parameters)
         return parametersAdapter.parameter!!
             .stream()
@@ -105,7 +86,6 @@ class OperationParametersParser(adapterFactory: IAdapterFactory) {
         if (parameters == null) {
             return null
         }
-        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
         val parametersAdapter = this.adapterFactory.createParameters(parameters)
         return parametersAdapter.parameter!!
             .stream()
@@ -117,9 +97,8 @@ class OperationParametersParser(adapterFactory: IAdapterFactory) {
             )
     }
 
-    fun getParameterParts(parameters: IBaseParameters?): MutableMap<String?, Any?> {
-        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
-        val parametersAdapter = adapterFactory.createParameters(parameters!!)
+    fun getParameterParts(parameters: IBaseParameters): MutableMap<String?, Any?> {
+        val parametersAdapter = adapterFactory.createParameters(parameters)
         val parts = parametersAdapter.parameter
 
         val parameterParts = mutableMapOf<String?, Any?>()
@@ -133,6 +112,7 @@ class OperationParametersParser(adapterFactory: IAdapterFactory) {
                 } else {
                     val existingValue: Any = parameterParts.get(part.name)!!
                     if (existingValue is MutableList<*>) {
+                        @Suppress("UNCHECKED_CAST")
                         (existingValue as MutableList<IBase?>).add(value)
                         parameterParts[part.name] = existingValue
                     } else {

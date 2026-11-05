@@ -16,8 +16,10 @@ class Try<T : Any> internal constructor(left: Exception?, right: T?) :
         return leftOrThrow()
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun <X : Any> map(map: Function<in T, out X>): Try<X> {
         if (hasException()) {
+            @Suppress("UNCHECKED_CAST")
             return this as Try<X>
         }
 
@@ -32,6 +34,7 @@ class Try<T : Any> internal constructor(left: Exception?, right: T?) :
         flatMapRight: Function<in T, out Either<Exception, out X>>
     ): Try<X> {
         if (hasException()) {
+            @Suppress("UNCHECKED_CAST")
             return this as Try<X>
         }
 

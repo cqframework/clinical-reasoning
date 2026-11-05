@@ -86,6 +86,7 @@ abstract class BaseBackboneElementBuilder<
     }
 
     protected fun self(): SELF {
+        @Suppress("UNCHECKED_CAST")
         return this as SELF
     }
 

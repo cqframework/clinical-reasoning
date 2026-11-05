@@ -42,6 +42,7 @@ object SearchHelper {
         searchParameters: MutableMap<String?, MutableList<IQueryParameterType?>?>?,
         headers: MutableMap<String?, String?>?,
     ): Bundle {
+        @Suppress("DEPRECATION")
         val result = repository.search(Bundle::class.java, resourceType, searchParameters, headers)
         val next = result.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {

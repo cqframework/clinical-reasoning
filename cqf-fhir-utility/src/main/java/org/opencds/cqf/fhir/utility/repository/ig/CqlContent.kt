@@ -23,8 +23,8 @@ object CqlContent {
             return
         }
 
-        var cqlPathExtractor: Function<IBaseResource?, String?>? = null
-        var cqlContentAttacher: BiConsumer<IBaseResource?, String?>? = null
+        var cqlPathExtractor: Function<IBaseResource?, String?>?
+        var cqlContentAttacher: BiConsumer<IBaseResource?, String?>?
         when (resource.structureFhirVersionEnum) {
             FhirVersionEnum.DSTU3 -> {
                 cqlPathExtractor = Function { resource: IBaseResource? ->
@@ -59,7 +59,7 @@ object CqlContent {
                 )
         }
 
-        readAndAttachCqlContent(resource, resourcePath!!, cqlPathExtractor, cqlContentAttacher)
+        readAndAttachCqlContent(resource, resourcePath, cqlPathExtractor, cqlContentAttacher)
     }
 
     private fun readAndAttachCqlContent(

@@ -16,15 +16,15 @@ object MetadataResourceHelper {
             .map { location ->
                 when (location!!.split("/")[0]) {
                     "ActivityDefinition" ->
-                        return@map repository.read(ActivityDefinition::class.java, IdType(location))
+                        repository.read(ActivityDefinition::class.java, IdType(location))
 
-                    "Library" -> return@map repository.read(Library::class.java, IdType(location))
-                    "Measure" -> return@map repository.read(Measure::class.java, IdType(location))
+                    "Library" -> repository.read(Library::class.java, IdType(location))
+                    "Measure" -> repository.read(Measure::class.java, IdType(location))
                     "PlanDefinition" ->
-                        return@map repository.read(PlanDefinition::class.java, IdType(location))
+                        repository.read(PlanDefinition::class.java, IdType(location))
 
-                    "ValueSet" -> return@map repository.read(ValueSet::class.java, IdType(location))
-                    else -> return@map null
+                    "ValueSet" -> repository.read(ValueSet::class.java, IdType(location))
+                    else -> null
                 }
             }
             .forEach(callback)

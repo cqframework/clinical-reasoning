@@ -110,9 +110,12 @@ public class ProcessAction {
     @SuppressWarnings("unchecked")
     protected void addQuestionnaireItemForInput(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         try {
-            for (var input : action.getInputDataRequirement().stream()
-                    .filter(IDataRequirementAdapter::hasProfile)
-                    .toList()) {
+            for (var input : action.getInputDataRequirement()) {
+                if (input.hasExtension(PresentationChoiceGroupProcessor.URL)) {
+                    PresentationChoiceGroupProcessor.process(request, input, repository, generateProcessor);
+                    continue;
+                }
+                if (!input.hasProfile()) continue;
                 for (var profileUrl : input.getProfile()) {
                     if (!request.questionnaireItemExistsForProfile(profileUrl)) {
                         var profile = searchRepositoryByCanonical(repository, profileUrl);
@@ -136,6 +139,9 @@ public class ProcessAction {
                 }
             }
         } catch (Exception e) {
+            if (action.getInputDataRequirement().stream().anyMatch(input -> input.hasExtension(PresentationChoiceGroupProcessor.URL))) {
+                throw new IllegalArgumentException("CRL presentation choice group generation failed", e);
+            }
             var message = "An error occurred while generating Questionnaire items for action input: %s"
                     .formatted(e.getMessage());
             request.logException(message);

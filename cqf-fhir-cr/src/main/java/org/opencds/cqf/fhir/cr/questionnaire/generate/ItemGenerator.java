@@ -39,6 +39,25 @@ public class ItemGenerator {
     protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
     protected static final String CHILD_LINK_ID_FORMAT = "%s.%s";
 
+    // Root-count allocation is unsafe once presentation wrappers nest existing roots.
+    public static String nextRootLinkId(List<IQuestionnaireItemComponentAdapter> items) {
+        var used = new java.util.HashSet<String>();
+        collectLinkIds(items, used);
+        int candidate = items.size() + 1;
+        while (true) {
+            var prefix = String.valueOf(candidate);
+            if (used.stream().noneMatch(id -> id.equals(prefix) || id.startsWith(prefix + "."))) return prefix;
+            candidate++;
+        }
+    }
+
+    private static void collectLinkIds(List<? extends org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter> items, java.util.Set<String> used) {
+        for (var item : items) {
+            used.add(item.getLinkId());
+            collectLinkIds(item.getItem(), used);
+        }
+    }
+
     protected final IRepository repository;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
@@ -62,8 +81,7 @@ public class ItemGenerator {
     @Nullable
     public <T extends IBaseExtension<?, ?>> Pair<IQuestionnaireItemComponentAdapter, List<T>> generate(
             GenerateRequest request) {
-        final String linkId =
-                String.valueOf(request.getQuestionnaireAdapter().getItem().size() + 1);
+        final String linkId = nextRootLinkId(request.getQuestionnaireAdapter().getItem());
         try {
             int childCount = 0;
             var caseFeature = getFeatureExpression(request);

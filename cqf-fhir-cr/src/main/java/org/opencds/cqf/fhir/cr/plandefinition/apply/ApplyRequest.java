@@ -357,7 +357,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public boolean questionnaireItemExistsForProfile(IPrimitiveType<String> profile) {
-        return questionnaireDefinitions.contains(profile.getValueAsString());
+        return questionnaireAdapter.getAllItemDefinitions().contains(profile.getValueAsString());
     }
 
     public ApplyRequest setQuestionnaire(IBaseResource questionnaire) {

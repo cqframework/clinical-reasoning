@@ -34,6 +34,12 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ItemGenerator {
+    // REFACTOR:grounded (#328): generic standard-profile unit mapping capability.
+    private static class QuantityUnitException extends IllegalArgumentException {
+        QuantityUnitException(String message) { super(message); }
+    }
+    public static final int QUANTITY_UNIT_PROTOCOL = 1;
+    public static final String ALLOWED_UNITS = "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits";
     protected static final Logger logger = LoggerFactory.getLogger(ItemGenerator.class);
     protected static final String NO_PROFILE_ERROR = "No profile defined for input. Unable to generate item.";
     protected static final String ITEM_CREATION_ERROR = "An error occurred during item creation: %s";
@@ -123,6 +129,7 @@ public class ItemGenerator {
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
         } catch (Exception ex) {
+            if (ex instanceof QuantityUnitException unitError) throw unitError;
             final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.error(message);
             return new ImmutablePair<>(createErrorItem(request, linkId, message), new ArrayList<>());
@@ -284,11 +291,32 @@ public class ItemGenerator {
             if (item.isChoiceItem()) {
                 itemTypeIsChoice.addProperties(element, item);
             }
+            addQuantityUnits(element, item);
             return item;
         } catch (Exception ex) {
+            if (ex instanceof QuantityUnitException unitError) throw unitError;
             final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
             logger.warn(message);
             return createErrorItem(request, childLinkId, message);
+        }
+    }
+
+    /** Standard ElementDefinition allowedUnits -> standard Quantity question unit choices.
+     * No initial numeric answer or measurement is fabricated. R4 is the qualified model.
+     */
+    protected void addQuantityUnits(IElementDefinitionAdapter element, IQuestionnaireItemComponentAdapter item) {
+        if (!element.hasExtension(ALLOWED_UNITS)) return;
+        if (!"quantity".equals(item.getType())) throw new QuantityUnitException("allowedUnits requires a Quantity question");
+        if (!(element.get() instanceof org.hl7.fhir.r4.model.ElementDefinition definition))
+            throw new QuantityUnitException("allowedUnits mapping is currently supported for FHIR R4");
+        var extensions = definition.getExtensionsByUrl(ALLOWED_UNITS);
+        if (extensions.size() != 1 || !(extensions.get(0).getValue() instanceof org.hl7.fhir.r4.model.CodeableConcept units)
+                || units.getCoding().isEmpty()) throw new QuantityUnitException("allowedUnits requires a CodeableConcept with unit codings; unit ValueSet generation is not supported");
+        for (var coding : units.getCoding()) {
+            if (!"http://unitsofmeasure.org".equals(coding.getSystem()) || !coding.hasCode())
+                throw new QuantityUnitException("allowedUnits requires UCUM unit codes");
+            item.addExtension(new org.hl7.fhir.r4.model.Extension(
+                    "http://hl7.org/fhir/StructureDefinition/questionnaire-unitOption", coding.copy()));
         }
     }
 

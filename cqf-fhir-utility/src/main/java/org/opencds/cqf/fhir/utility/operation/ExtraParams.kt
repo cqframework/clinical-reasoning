@@ -1,0 +1,12 @@
+package org.opencds.cqf.fhir.utility.operation
+
+/**
+ * Used to denote the parameters that are not present in the @Operation definition. The absence of
+ * this annotation on a method implies that it is strict, and will only accept parameters that are
+ * defined in the @Operation definition. Additional parameters will result in an error.
+ *
+ * If this annotation is present on a method, it must be the last parameter.
+ */
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.VALUE_PARAMETER)
+annotation class ExtraParams

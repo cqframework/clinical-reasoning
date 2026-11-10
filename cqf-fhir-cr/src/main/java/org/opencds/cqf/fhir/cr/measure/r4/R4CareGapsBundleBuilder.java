@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import kotlin.Pair;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -258,7 +258,7 @@ public class R4CareGapsBundleBuilder {
                 .withCode(CARE_GAPS_CODES.get("http://terminology.hl7.org/CodeSystem/v3-ActCode/CAREGAP"))
                 .withPatient(Ids.simple(patient))
                 .withEvidenceDetail(Ids.simple(measureReport))
-                .withModifierExtension(new ImmutablePair<>(
+                .withModifierExtension(new Pair<>(
                         CARE_GAPS_GAP_STATUS_EXTENSION,
                         new CodeableConceptSettings()
                                 .add(

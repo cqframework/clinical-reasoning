@@ -85,9 +85,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         val system = enumFactory.toSystem(enumeration.getValue())
         val codeAsString = enumFactory.toCode(enumeration.getValue())
         if (!system.isNullOrEmpty() && !codeAsString.isNullOrEmpty()) {
-            val code = Code()
-            code.code = codeAsString
-            code.system = system
+            val code = Code(code = codeAsString, system = system)
             codes.add(code)
         }
 

@@ -103,12 +103,10 @@ public class MeasureProcessorTimeUtils {
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
     private static DateTime convertToUtc(DateTime dateTime) {
-        if (dateTime == null || dateTime.getDateTime() == null) {
+        if (dateTime == null) {
             return null;
         }
-        final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
-        newDateTime.setPrecision(dateTime.getPrecision());
-        return newDateTime;
+        return new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC), dateTime.getPrecision());
     }
 
     /**

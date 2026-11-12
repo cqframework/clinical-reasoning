@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -13,7 +14,9 @@ import static org.mockito.Mockito.mock;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.List;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,6 +27,8 @@ import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -136,5 +141,54 @@ class ApplyRequestTests {
         assertInstanceOf(PopulateRequest.class, populateRequest);
         var parameters = (org.hl7.fhir.r4.model.Parameters) populateRequest.getParameters();
         assertEquals(5, parameters.getParameter().size());
+    }
+
+    @Test
+    void childItemDefinitionsAreTrackedAndNotDuplicatedWhenAddingNewQuestionnaireItems() {
+        var exampleDefinition1 = "http://example.com/fhir/StructureDefinition/example-observation1";
+        var exampleDefinition2 = "http://example.com/fhir/StructureDefinition/example-sbservation2";
+        var exampleDefinition3 = "http://example.com/fhir/StructureDefinition/example-observation3";
+        var fhirVersion = FhirVersionEnum.R4;
+        var questionnaire = new org.hl7.fhir.r4.model.Questionnaire();
+        var request = RequestHelpers.newPDApplyRequestForVersion(
+                        fhirVersion, libraryEngine, null, inputParameterResolver)
+                .setQuestionnaire(questionnaire);
+        var item1 = newQuestionnaireItem(fhirVersion)
+                .setLinkId("1")
+                .setType("group")
+                .setDefinition(exampleDefinition1);
+        item1.setItem(List.of(
+                newQuestionnaireItem(fhirVersion)
+                        .setLinkId("1.1")
+                        .setType("boolean")
+                        .setDefinition(String.format("%s#value[x]", exampleDefinition1)),
+                newQuestionnaireItem(fhirVersion)
+                        .setLinkId("1.2")
+                        .setType("date")
+                        .setDefinition(String.format("%s#effectiveDate", exampleDefinition1))));
+        request.addQuestionnaireItem(item1);
+        assertEquals(
+                1, request.getQuestionnaireAdapter().getAllItemDefinitions().size());
+        var item2 = newQuestionnaireItem(fhirVersion).setLinkId("2").setType("group");
+        item2.setItem(List.of(
+                newQuestionnaireItem(fhirVersion)
+                        .setLinkId("2.1")
+                        .setType("boolean")
+                        .setDefinition(String.format("%s#value", exampleDefinition2)),
+                newQuestionnaireItem(fhirVersion)
+                        .setLinkId("2.2")
+                        .setType("boolean")
+                        .setDefinition(String.format("%s#value", exampleDefinition3))));
+        request.addQuestionnaireItem(item2);
+        assertEquals(
+                3, request.getQuestionnaireAdapter().getAllItemDefinitions().size());
+        assertTrue(request.getQuestionnaireAdapter()
+                .getAllItemDefinitions()
+                .containsAll(List.of(exampleDefinition1, exampleDefinition2, exampleDefinition3)));
+    }
+
+    private IQuestionnaireItemComponentAdapter newQuestionnaireItem(FhirVersionEnum fhirVersion) {
+        return ((IQuestionnaireItemComponentAdapter)
+                IAdapterFactory.createAdapterForBase(fhirVersion, new QuestionnaireItemComponent()));
     }
 }

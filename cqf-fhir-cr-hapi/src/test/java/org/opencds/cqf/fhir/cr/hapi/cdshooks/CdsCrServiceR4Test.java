@@ -41,6 +41,7 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import tools.jackson.databind.json.JsonMapper;
 
 @SuppressWarnings("UnstableApiUsage")
 class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
@@ -52,7 +53,7 @@ class CdsCrServiceR4Test extends BaseCdsCrServiceTest {
         fhirContext = FhirContext.forR4Cached();
         repository = getRepository();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
-        objectMapper = new CdsHooksObjectMapperFactory(fhirContext).newMapper();
+        objectMapper = (JsonMapper) new CdsHooksObjectMapperFactory(fhirContext).newMapper();
         testSubject = new CdsCrService(REQUEST_DETAILS, repository);
     }
 

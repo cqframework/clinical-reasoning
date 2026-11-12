@@ -7,10 +7,12 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import kotlin.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
@@ -22,6 +24,7 @@ import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
@@ -109,8 +112,11 @@ public class ProcessAction {
 
     @SuppressWarnings("unchecked")
     protected void addQuestionnaireItemForInput(ApplyRequest request, IPlanDefinitionActionAdapter action) {
+        var newItems = new ArrayList<
+                org.apache.commons.lang3.tuple.Pair<IQuestionnaireItemComponentAdapter, List<IBaseExtension<?, ?>>>>();
         try {
             for (var input : action.getInputDataRequirement().stream()
+                    .filter(Objects::nonNull)
                     .filter(IDataRequirementAdapter::hasProfile)
                     .toList()) {
                 for (var profileUrl : input.getProfile()) {
@@ -129,8 +135,7 @@ public class ProcessAction {
                                                 .getValueAsString());
                                 // item Constants.CPG_INPUT_DESCRIPTION
                             }
-                            request.addQuestionnaireItem(item.getLeft());
-                            request.addLaunchContextExtensions(item.getRight());
+                            newItems.add(item);
                         }
                     }
                 }
@@ -139,6 +144,39 @@ public class ProcessAction {
             var message = "An error occurred while generating Questionnaire items for action input: %s"
                     .formatted(e.getMessage());
             request.logException(message);
+        }
+        if (!newItems.isEmpty()) {
+            if (newItems.size() == 1) {
+                var item = newItems.get(0);
+                request.addQuestionnaireItem(item.getLeft());
+                request.addLaunchContextExtensions(item.getRight());
+            } else {
+                var groupItem = request.getAdapterFactory()
+                        .createQuestionnaireItem()
+                        .setType("group")
+                        .setLinkId(String.valueOf(
+                                request.getQuestionnaireAdapter().getItem().size() + 1))
+                        .setText(action.hasTitle() ? action.getTitle() : action.getDescription());
+                for (int i = 0; i < newItems.size(); i++) {
+                    var item = newItems.get(i);
+                    var newItem = item.getLeft();
+                    updateLinkIds(groupItem.getLinkId(), i + 1, newItem);
+                    groupItem.addItem(newItem);
+                    request.addLaunchContextExtensions(item.getRight());
+                }
+                request.addQuestionnaireItem(groupItem);
+            }
+        }
+    }
+
+    protected void updateLinkIds(String parentLinkId, int count, IQuestionnaireItemComponentAdapter item) {
+        var newLinkId = String.format("%s.%s", parentLinkId, count);
+        item.setLinkId(newLinkId);
+        if (item.hasItem()) {
+            for (int i = 0; i < item.getItem().size(); i++) {
+                updateLinkIds(newLinkId, i + 1, (IQuestionnaireItemComponentAdapter)
+                        item.getItem().get(i));
+            }
         }
     }
 

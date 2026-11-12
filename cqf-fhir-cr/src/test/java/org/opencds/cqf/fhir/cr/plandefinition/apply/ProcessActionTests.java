@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.r4.model.StringType;
@@ -38,6 +39,7 @@ import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -385,5 +387,22 @@ class ProcessActionTests {
         assertEquals(1, result.getAction().size());
         assertEquals("selected", result.getAction().get(0).getId());
         assertFalse(result.getAction().get(0).getAction().isEmpty());
+    }
+
+    @Test
+    void updateLinkIdsUpdatesChildItemsCorrectly() {
+        var item = adaptItem(new QuestionnaireItemComponent()).setLinkId("2").setType("group");
+        item.addItem(
+                adaptItem(new QuestionnaireItemComponent()).setLinkId("2.1").setType("boolean"));
+        item.addItem(
+                adaptItem(new QuestionnaireItemComponent()).setLinkId("2.2").setType("boolean"));
+        fixture.updateLinkIds("2", 1, item);
+        assertEquals("2.1", item.getLinkId());
+        assertEquals("2.1.1", item.getItem().get(0).getLinkId());
+        assertEquals("2.1.2", item.getItem().get(1).getLinkId());
+    }
+
+    private IQuestionnaireItemComponentAdapter adaptItem(QuestionnaireItemComponent item) {
+        return (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, item);
     }
 }

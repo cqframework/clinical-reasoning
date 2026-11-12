@@ -201,10 +201,10 @@ public class ApplyRequest implements ICpgRequest {
                             value = subjectId.getValue();
                             break;
                         case ENCOUNTER:
-                            value = encounterId.getValue();
+                            value = encounterId == null ? null : encounterId.getValue();
                             break;
                         case USER:
-                            value = practitionerId.getValue();
+                            value = practitionerId == null ? null : practitionerId.getValue();
                             break;
                         default:
                             break;
@@ -350,9 +350,16 @@ public class ApplyRequest implements ICpgRequest {
     public void addQuestionnaireItem(IQuestionnaireItemComponentAdapter item) {
         if (questionnaireAdapter != null) {
             questionnaireAdapter.addItem(item);
-            if (item.hasDefinition()) {
-                questionnaireDefinitions.add(item.getDefinition().split("#")[0]);
-            }
+            addItemDefinition(item);
+        }
+    }
+
+    protected void addItemDefinition(IQuestionnaireItemComponentAdapter item) {
+        if (item.hasDefinition()) {
+            questionnaireDefinitions.add(item.getDefinition().split("#")[0]);
+        }
+        if (item.hasItem()) {
+            item.getItem().forEach(i -> addItemDefinition((IQuestionnaireItemComponentAdapter) i));
         }
     }
 

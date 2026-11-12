@@ -154,11 +154,16 @@ public class ProcessAction {
                 var groupItem = request.getAdapterFactory()
                         .createQuestionnaireItem()
                         .setType("group")
+                        .setLinkId(String.valueOf(
+                                request.getQuestionnaireAdapter().getItem().size() + 1))
                         .setText(action.hasTitle() ? action.getTitle() : action.getDescription());
-                newItems.forEach(item -> {
-                    groupItem.addItem(item.getLeft());
+                for (int i = 0; i < newItems.size(); i++) {
+                    var item = newItems.get(i);
+                    var newItem = item.getLeft();
+                    newItem.setLinkId(String.format("%s.%s", groupItem.getLinkId(), i + 1));
+                    groupItem.addItem(newItem);
                     request.addLaunchContextExtensions(item.getRight());
-                });
+                }
                 request.addQuestionnaireItem(groupItem);
             }
         }

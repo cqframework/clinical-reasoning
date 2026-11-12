@@ -480,8 +480,10 @@ class PlanDefinitionProcessorTests {
                 .get();
         var groupItem = questionnaire.getItemFirstRep();
         assertEquals(QuestionnaireItemType.GROUP, groupItem.getType());
+        assertEquals("1", groupItem.getLinkId());
         assertEquals("Grouped Items", groupItem.getText());
         assertEquals(2, groupItem.getItem().size());
+        groupItem.getItem().forEach(item -> assertTrue(item.hasLinkId()));
     }
 
     @Test

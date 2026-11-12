@@ -350,9 +350,16 @@ public class ApplyRequest implements ICpgRequest {
     public void addQuestionnaireItem(IQuestionnaireItemComponentAdapter item) {
         if (questionnaireAdapter != null) {
             questionnaireAdapter.addItem(item);
-            if (item.hasDefinition()) {
-                questionnaireDefinitions.add(item.getDefinition().split("#")[0]);
-            }
+            addItemDefinition(item);
+        }
+    }
+
+    protected void addItemDefinition(IQuestionnaireItemComponentAdapter item) {
+        if (item.hasDefinition()) {
+            questionnaireDefinitions.add(item.getDefinition().split("#")[0]);
+        }
+        if (item.hasItem()) {
+            item.getItem().forEach(i -> addItemDefinition((IQuestionnaireItemComponentAdapter) i));
         }
     }
 

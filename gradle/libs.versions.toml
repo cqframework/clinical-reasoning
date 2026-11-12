@@ -1,11 +1,11 @@
 [versions]
-hapi = "8.12.0"
+hapi = "8.13.16-SNAPSHOT"
 cql = "5.6.1"
 
 kotlin = "2.3.20"
 
-spring = "6.2.12"
-spring-boot = "3.4.11"
+spring = "7.0.10"
+spring-boot = "4.0.9"
 picocli = "4.7.7"
 jakarta-annotation = "2.1.1"
 commons-compress = "1.28.0"

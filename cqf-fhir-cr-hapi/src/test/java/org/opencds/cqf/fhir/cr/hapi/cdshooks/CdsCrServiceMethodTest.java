@@ -11,13 +11,13 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class CdsCrServiceMethodTest {
@@ -71,7 +71,7 @@ class CdsCrServiceMethodTest {
         when(exception.getCause()).thenReturn(Mockito.mock(BaseServerResponseException.class));
         when(cdsCrService.invoke(new CdsServiceRequestJson())).thenThrow(exception);
 
-        assertThatThrownBy(() -> testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
+        assertThatThrownBy(() -> testSubject.invoke(new JsonMapper(), new CdsServiceRequestJson(), serviceId))
                 .isInstanceOf(BaseServerResponseException.class);
     }
 
@@ -82,7 +82,7 @@ class CdsCrServiceMethodTest {
         when(exception.getCause()).thenReturn(Mockito.mock(Exception.class));
         when(cdsCrService.invoke(new CdsServiceRequestJson())).thenThrow(exception);
 
-        assertThatThrownBy(() -> testSubject.invoke(new ObjectMapper(), new CdsServiceRequestJson(), serviceId))
+        assertThatThrownBy(() -> testSubject.invoke(new JsonMapper(), new CdsServiceRequestJson(), serviceId))
                 .isInstanceOf(InternalErrorException.class);
     }
 }

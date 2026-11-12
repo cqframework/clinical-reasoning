@@ -122,7 +122,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
         resourceType: Class<out IBaseResource>,
         idPart: String,
         assignment: CompartmentAssignment,
-    ): MutableList<Path?> {
+    ): MutableList<Path> {
         validateAssignment(resourceType, assignment)
 
         val directories = directories(resourceType, assignment)
@@ -176,7 +176,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     // Helper to get the base directories for a given category and the current layout conventions.
     // relative to the root.
     private fun categoryDirectories(category: ResourceCategory?): MutableList<String?>? {
-        val map: MutableMap<ResourceCategory?, MutableList<String?>?> =
+        val map: MutableMap<ResourceCategory, MutableList<String?>> =
             BASE_DIRECTORIES.rowMap()[conventions.categoryLayout]!!
         check(map.containsKey(category)) {
             ("No base directories configured for category " +
@@ -190,8 +190,8 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     private fun combine(
         directories: MutableList<Path>,
         filenames: MutableList<String>,
-    ): MutableList<Path?> {
-        val paths = ArrayList<Path?>()
+    ): MutableList<Path> {
+        val paths = ArrayList<Path>()
         for (directory in directories) {
             for (name in filenames) {
                 paths.add(directory.resolve(name))
@@ -279,8 +279,8 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     companion object {
         const val EXTERNAL_DIRECTORY: String = "external"
 
-        private val FILE_EXTENSIONS: BiMap<EncodingEnum?, String?> =
-            ImmutableBiMap.Builder<EncodingEnum?, String?>()
+        private val FILE_EXTENSIONS: BiMap<EncodingEnum, String> =
+            ImmutableBiMap.Builder<EncodingEnum, String>()
                 .put(EncodingEnum.JSON, "json")
                 .put(EncodingEnum.XML, "xml")
                 .put(EncodingEnum.RDF, "rdf")
@@ -295,8 +295,8 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
         // The order of the lists defines the search/read/write priority (index 0 is the preferred
         // directory).
         private val BASE_DIRECTORIES:
-            Table<CategoryLayout?, ResourceCategory?, MutableList<String?>?> =
-            ImmutableTable.Builder<CategoryLayout?, ResourceCategory?, MutableList<String?>?>()
+            Table<CategoryLayout, ResourceCategory, MutableList<String?>> =
+            ImmutableTable.Builder<CategoryLayout, ResourceCategory, MutableList<String?>>()
                 .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, mutableListOf("input"))
                 .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, mutableListOf("input"))
                 .put(CategoryLayout.FLAT, ResourceCategory.DATA, mutableListOf("input"))

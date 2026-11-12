@@ -200,11 +200,7 @@ class ValueSetsTest {
 
     @Test
     void testAddCodeToExpansion() {
-        var code = new Code();
-        code.setCode("test");
-        code.setDisplay("Test");
-        code.setSystem("www.test.com");
-        code.setVersion("1.0.0");
+        var code = new Code("test", "Test", "www.test.com", "1.0.0");
         var expansion = new ValueSet.ValueSetExpansionComponent();
         try {
             ValueSets.addCodeToExpansion(fhirContextR4, expansion, code);

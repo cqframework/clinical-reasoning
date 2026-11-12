@@ -39,8 +39,6 @@ public class R4DateHelper {
 
     private DateTime convertToDateTime(ZonedDateTime zonedDateTime) {
         final OffsetDateTime offsetDateTime = zonedDateTime.toOffsetDateTime();
-        final DateTime convertedDateTime = new DateTime(offsetDateTime);
-        convertedDateTime.setPrecision(Precision.SECOND);
-        return convertedDateTime;
+        return new DateTime(offsetDateTime, Precision.SECOND);
     }
 }

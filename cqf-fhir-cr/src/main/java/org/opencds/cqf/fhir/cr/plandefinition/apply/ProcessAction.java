@@ -160,11 +160,22 @@ public class ProcessAction {
                 for (int i = 0; i < newItems.size(); i++) {
                     var item = newItems.get(i);
                     var newItem = item.getLeft();
-                    newItem.setLinkId(String.format("%s.%s", groupItem.getLinkId(), i + 1));
+                    updateLinkIds(groupItem.getLinkId(), i + 1, newItem);
                     groupItem.addItem(newItem);
                     request.addLaunchContextExtensions(item.getRight());
                 }
                 request.addQuestionnaireItem(groupItem);
+            }
+        }
+    }
+
+    protected void updateLinkIds(String parentLinkId, int count, IQuestionnaireItemComponentAdapter item) {
+        var newLinkId = String.format("%s.%s", parentLinkId, count);
+        item.setLinkId(newLinkId);
+        if (item.hasItem()) {
+            for (int i = 0; i < item.getItem().size(); i++) {
+                updateLinkIds(newLinkId, i + 1, (IQuestionnaireItemComponentAdapter)
+                        item.getItem().get(i));
             }
         }
     }

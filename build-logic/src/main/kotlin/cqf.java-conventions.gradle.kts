@@ -23,6 +23,8 @@ repositories {
 dependencies {
     api(platform(libs.hapi.fhir.bom))
     api(platform(libs.cql.bom))
+    // Align Jackson modules at a patched security version.
+    api(enforcedPlatform("com.fasterxml.jackson:jackson-bom:2.22.3"))
     testImplementation(platform(libs.junit.bom))
 
     compileOnly(libs.jakarta.annotation.api)
@@ -36,6 +38,17 @@ dependencies {
 
     errorprone("com.google.errorprone:error_prone_core:${libs.versions.error.prone.core.get()}")
 }
+
+// Change distributed/test Guava only; retain upstream compile-time annotations/API.
+configurations.matching { it.name == "runtimeClasspath" || it.name.endsWith("RuntimeClasspath") }
+    .configureEach {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.google.guava" && requested.name == "guava") {
+                useVersion("33.7.2-jre")
+                because("Address fixable HIGH security findings in the distributed Guava runtime")
+            }
+        }
+    }
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"

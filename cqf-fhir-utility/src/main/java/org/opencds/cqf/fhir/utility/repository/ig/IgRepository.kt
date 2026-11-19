@@ -108,8 +108,8 @@ constructor(
 ) : IRepository {
     private val resourceMatcher = Repositories.getResourceMatcher(this.fhirContext)
 
-    private val resourceCache: Cache<Path?, Optional<IBaseResource>> =
-        CacheBuilder.newBuilder().maximumSize(5000).build<Path?, Optional<IBaseResource>>()
+    private val resourceCache: Cache<Path, Optional<IBaseResource>> =
+        CacheBuilder.newBuilder().maximumSize(5000).build<Path, Optional<IBaseResource>>()
     private val pathResolver = ResourcePathResolver(this.root, this.conventions)
     private val compartmentAssigner =
         CompartmentAssigner(
@@ -156,8 +156,8 @@ constructor(
      *
      * @param paths the set of paths to evict from the cache
      */
-    fun clearCache(paths: Iterable<Path?>) {
-        this.resourceCache.invalidate(paths)
+    fun clearCache(paths: Iterable<Path>) {
+        this.resourceCache.invalidateAll(paths)
     }
 
     /**

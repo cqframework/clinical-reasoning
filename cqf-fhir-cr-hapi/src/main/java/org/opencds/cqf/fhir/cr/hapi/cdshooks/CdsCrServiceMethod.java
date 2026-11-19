@@ -3,18 +3,18 @@ package org.opencds.cqf.fhir.cr.hapi.cdshooks;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsServiceMethod;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class CdsCrServiceMethod extends BaseCdsCrMethod implements ICdsServiceMethod {
     private final CdsServiceJson cdsServiceJson;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     public CdsCrServiceMethod(CdsServiceJson cdsServiceJson, ICdsCrServiceFactory cdsCrServiceFactory) {
-        this(new ObjectMapper(), cdsServiceJson, cdsCrServiceFactory);
+        this(new JsonMapper(), cdsServiceJson, cdsCrServiceFactory);
     }
 
     public CdsCrServiceMethod(
-            ObjectMapper objectMapper, CdsServiceJson cdsServiceJson, ICdsCrServiceFactory cdsCrServiceFactory) {
+            JsonMapper objectMapper, CdsServiceJson cdsServiceJson, ICdsCrServiceFactory cdsCrServiceFactory) {
         super(cdsCrServiceFactory);
         this.cdsServiceJson = cdsServiceJson;
         this.objectMapper = objectMapper;

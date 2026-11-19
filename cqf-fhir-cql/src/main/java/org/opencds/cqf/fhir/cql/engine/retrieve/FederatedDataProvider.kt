@@ -61,6 +61,6 @@ class FederatedDataProvider(
             )
         }
 
-        return Iterables.concat(results)
+        return Iterables.concat(results.filterNotNull())
     }
 }

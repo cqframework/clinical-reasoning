@@ -46,7 +46,24 @@ interface IStructureDefinitionAdapter : IKnowledgeArtifactAdapter {
 
     fun getSliceElements(sliceName: String?): MutableList<IElementDefinitionAdapter?> {
         return this.differentialElements!!
-            .filter { e -> e!!.id!!.contains(sliceName!!) && e.sliceName.isNullOrBlank() }
+            .filter { e -> matchesSliceElementId(e!!.id, sliceName) && e.sliceName.isNullOrBlank() }
             .toMutableList()
+    }
+
+    companion object {
+        /**
+         * Matches slice ids on name boundaries so `identifier:id` does not also match
+         * `identifier:idType`.
+         */
+        @JvmStatic
+        fun matchesSliceElementId(id: String?, sliceName: String?): Boolean {
+            if (id.isNullOrBlank() || sliceName.isNullOrBlank()) {
+                return false
+            }
+            return id.contains(".$sliceName.") ||
+                id.endsWith(".$sliceName") ||
+                id.contains(":$sliceName.") ||
+                id.endsWith(":$sliceName")
+        }
     }
 }

@@ -1,0 +1,71 @@
+{
+  "resourceType": "Measure",
+  "id": "FeasibilityMeasure",
+  "url": "https://research.balgrist.ch/Measure/FeasibilityMeasure",
+  "version": "1.0.0",
+  "name": "FeasibilityMeasure",
+  "title": "Patient and Imaging Study Feasibility Measure",
+  "status": "active",
+  "description": "Counts patients matching specified demographic and imaging study inclusion/exclusion criteria.",
+  "library": [
+    "https://research.balgrist.ch/Library/FeasibilityMeasure|1.0.0"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+        "code": "cohort",
+        "display": "Cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "feasibility-cohort",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "InitialPopulation"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "patient-id-stratifier",
+          "code": {
+            "text": "PatientIdStratifier"
+          },
+          "component": [
+            {
+              "id": "patient-id-stratifier-component",
+              "code": {
+                "text": "PatientId"
+              },
+              "criteria": {
+                "language": "text/cql-identifier",
+                "expression": "PatientIdStratifier"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

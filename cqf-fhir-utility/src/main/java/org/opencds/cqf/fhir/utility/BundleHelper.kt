@@ -260,7 +260,7 @@ object BundleHelper {
             FhirVersionEnum.R5 -> (bundle as org.hl7.fhir.r5.model.Bundle).entry
             else ->
                 throw java.lang.IllegalArgumentException(
-                    BundleHelper.UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
+                    UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
                 )
         }
             as MutableList<T?>
@@ -319,9 +319,7 @@ object BundleHelper {
     ): MutableList<IIdType?> {
         val entry = getEntry<IBaseBackboneElement>(bundle)
 
-        return entry
-            .map { BundleHelper.getEntryResource(fhirVersion, it!!)!!.idElement }
-            .toMutableList()
+        return entry.map { getEntryResource(fhirVersion, it!!)!!.idElement }.toMutableList()
     }
 
     /**

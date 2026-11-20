@@ -1,6 +1,6 @@
 [versions]
 hapi = "9.0.0"
-cql = "5.6.1"
+cql = "5.7.0"
 
 kotlin = "2.3.20"
 

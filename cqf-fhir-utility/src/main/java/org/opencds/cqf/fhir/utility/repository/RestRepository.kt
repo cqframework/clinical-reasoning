@@ -69,7 +69,7 @@ class RestRepository(protected val client: IGenericClient) : IRepository {
 
                 params[key] = flattenLists
             }
-            searchParameters.entries().forEach { p -> params[p!!.key] = p.value }
+            searchParameters.entries().forEach { p -> params[p.key] = p.value }
         }
         return search(bundleType, resourceType, params, mutableMapOf())
     }

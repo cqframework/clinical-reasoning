@@ -335,7 +335,7 @@ constructor(
         val paths = this.pathResolver.candidates(resourceType, id.idPart, assignment!!)
         val resource =
             paths
-                .map { path -> this.cachedReadResource(path!!) }
+                .map { path -> this.cachedReadResource(path) }
                 .filter { obj -> obj.isPresent }
                 .map { obj -> obj.get() }
                 .firstOrNull()

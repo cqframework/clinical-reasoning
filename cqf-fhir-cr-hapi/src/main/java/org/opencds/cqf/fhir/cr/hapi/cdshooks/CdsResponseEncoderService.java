@@ -141,7 +141,7 @@ public class CdsResponseEncoderService {
 
         if (action.hasSelectionBehavior()) {
             card.setSelectionBehaviour(action.getSelectionBehavior());
-            action.getAction().forEach(this::resolveSuggestion);
+            action.getAction().forEach(child -> card.addSuggestion(resolveSuggestion(child)));
         }
 
         // Leaving this out until spec details how to map system actions.

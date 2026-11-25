@@ -100,6 +100,52 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 .measureReport();
     }
 
+    /**
+     * Evaluates a single measure for a single subject and returns the full evaluation result — the
+     * {@link MeasureReport}, the captured {@link MeasureDef}, and the per-subject CQL
+     * {@link CqlEvaluationResult} map — rather than only the MeasureReport that {@link #evaluate}
+     * returns.
+     *
+     * <p>This is the supported, public way to obtain the MeasureDef (population definitions,
+     * evaluation errors, url/version) and the raw CQL evaluation results (expression results, and,
+     * when debug logging is enabled on the engine, debug results and traces) alongside the report.
+     * The evaluation runs against the {@link IRepository} this service was constructed with.
+     *
+     * @param measure the measure to evaluate
+     * @param periodStart start of the measurement period (nullable)
+     * @param periodEnd end of the measurement period (nullable)
+     * @param reportType the MeasureReport type (e.g. "subject")
+     * @param subjectId the subject to evaluate (e.g. "Patient/123")
+     * @param lastReceivedOn optional last-received-on timestamp
+     * @param parameters CQL parameters
+     * @param productLine product line
+     * @param practitioner practitioner id, when scoping the evaluation to a practitioner
+     * @return the MeasureDef, MeasureReport, and per-subject CQL evaluation results
+     */
+    public MeasureDefAndR4MeasureReport evaluateWithDef(
+            MeasureReference measure,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            String subjectId,
+            String lastReceivedOn,
+            Parameters parameters,
+            String productLine,
+            String practitioner) {
+
+        return evaluateSingleMeasureCaptureDef(
+                measure,
+                periodStart,
+                periodEnd,
+                reportType,
+                subjectId,
+                lastReceivedOn,
+                repository,
+                parameters,
+                productLine,
+                practitioner);
+    }
+
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
             MeasureReference measure,

@@ -586,7 +586,7 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
-                .hasDataRequirements(29);
+                .hasDataRequirements(22);
     }
 
     @Test
@@ -595,7 +595,7 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
-                .hasDataRequirements(19);
+                .hasDataRequirements(12);
     }
 
     @Test
@@ -604,6 +604,6 @@ class PlanDefinitionProcessorTests {
                 .when()
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
-                .hasDataRequirements(19);
+                .hasDataRequirements(13);
     }
 }

@@ -16,7 +16,7 @@ class DataRequirementsTest {
                 .periodEnd("2020-01-01")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(28)
+                .hasDataRequirementCount(16)
                 .hasParameterDefCount(10)
                 .hasRelatedArtifactCount(25)
                 .report();
@@ -30,7 +30,7 @@ class DataRequirementsTest {
                 .periodEnd("2020-01-01")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(29)
+                .hasDataRequirementCount(16)
                 .hasParameterDefCount(16)
                 .hasRelatedArtifactCount(35)
                 .report();
@@ -43,7 +43,7 @@ class DataRequirementsTest {
                 .measureId("DischargedonAntithromboticTherapyFHIR")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(29)
+                .hasDataRequirementCount(16)
                 .hasParameterDefCount(16)
                 .hasRelatedArtifactCount(35)
                 .report();
@@ -71,7 +71,7 @@ class DataRequirementsTest {
                 .periodEnd("2024-12-31")
                 .DataRequirements()
                 .then()
-                .hasDataRequirementCount(3)
+                .hasDataRequirementCount(2)
                 .hasParameterDefCount(7)
                 .hasRelatedArtifactCount(1)
                 .report();

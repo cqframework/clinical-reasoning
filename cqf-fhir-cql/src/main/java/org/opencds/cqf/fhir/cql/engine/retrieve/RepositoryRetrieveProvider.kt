@@ -12,6 +12,7 @@ import org.opencds.cqf.cql.engine.runtime.Code
 import org.opencds.cqf.cql.engine.runtime.Interval
 import org.opencds.cqf.cql.engine.runtime.Value
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.CONVERSION_MODE
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable
@@ -33,6 +34,19 @@ class RepositoryRetrieveProvider(
     }
 
     private val fhirContext: FhirContext = repository.fhirContext()
+
+    /**
+     * Whether to convert retrieved resources lazily. Lazy conversion reads resource fields at
+     * access time, so AUTO enables it only for a repository known to return value-stable resources
+     * — currently an [InMemoryFhirRepository] (bundle-backed, read-only during evaluation). LAZY
+     * forces it; EAGER disables it.
+     */
+    private val convertLazily: Boolean =
+        when (retrieveSettings.conversionMode) {
+            CONVERSION_MODE.EAGER -> false
+            CONVERSION_MODE.LAZY -> true
+            CONVERSION_MODE.AUTO -> repository is InMemoryFhirRepository
+        }
 
     override fun retrieve(
         context: String?,
@@ -70,7 +84,7 @@ class RepositoryRetrieveProvider(
         return iter
             .toStream()
             .filter(config.filter)
-            .map { r -> modelResolver.toCqlValue(r, false) }
+            .map { r -> modelResolver.toCqlValue(r, false, convertLazily) }
             .toList()
     }
 

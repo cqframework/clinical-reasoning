@@ -5,15 +5,21 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.dev.server.RepositoryRestProviderRegistrar;
+import org.opencds.cqf.fhir.cr.dev.server.annotations.OnR4Condition;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.ApplyOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.CqlOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.EvaluateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.ExtractOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.PackageOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.PopulateOperationConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.r4.QuestionnaireOperationConfig;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.MeasureOperationsProvider;
@@ -26,7 +32,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * R4 server wiring. Provides every bean needed to stand up a clinical reasoning server backed by
@@ -39,7 +47,17 @@ import org.springframework.context.annotation.Configuration;
  */
 @SuppressWarnings("UnstableApiUsage")
 @Configuration
+@Conditional(OnR4Condition.class)
 @EnableConfigurationProperties(ServerProperties.class)
+@Import({
+    ApplyOperationConfig.class,
+    CqlOperationConfig.class,
+    EvaluateOperationConfig.class,
+    ExtractOperationConfig.class,
+    PackageOperationConfig.class,
+    PopulateOperationConfig.class,
+    QuestionnaireOperationConfig.class
+})
 public class ServerR4Config {
 
     @Bean
@@ -101,26 +119,8 @@ public class ServerR4Config {
     }
 
     @Bean
-    public CrSettings crSettings(
-            EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologySettings) {
-        return new CrSettings()
-                .withEvaluationSettings(evaluationSettings)
-                .withTerminologyServerClientSettings(terminologySettings);
-    }
-
-    @Bean
     public MeasureEvaluationOptions measureEvaluationOptions() {
         return MeasureEvaluationOptions.defaultOptions();
-    }
-
-    @Bean
-    public MeasurePeriodValidator measurePeriodValidator() {
-        return new MeasurePeriodValidator();
-    }
-
-    @Bean
-    public StringTimePeriodHandler stringTimePeriodHandler() {
-        return new StringTimePeriodHandler(ZoneOffset.UTC);
     }
 
     @Bean

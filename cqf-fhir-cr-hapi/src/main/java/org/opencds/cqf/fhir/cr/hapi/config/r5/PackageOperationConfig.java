@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.dev.server.config;
+package org.opencds.cqf.fhir.cr.hapi.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -13,48 +13,51 @@ import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.PackageJobService;
 import org.opencds.cqf.fhir.cr.hapi.common.PackageJobStatusProvider;
+import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionPackageProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.valueset.ValueSetPackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.graphdefinition.GraphDefinitionPackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.library.LibraryPackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.plandefinition.PlanDefinitionPackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.questionnaire.QuestionnairePackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.valueset.ValueSetPackageProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(CrProcessorConfig.class)
 public class PackageOperationConfig {
     @Bean
-    PlanDefinitionPackageProvider r4PlanDefinitionPackageProvider(
+    PlanDefinitionPackageProvider r5PlanDefinitionPackageProvider(
             IPlanDefinitionProcessorFactory planDefinitionProcessorFactory,
             AsyncPackageOperationHelper asyncPackageOperationHelper) {
         return new PlanDefinitionPackageProvider(planDefinitionProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    QuestionnairePackageProvider r4QuestionnairePackageProvider(
+    QuestionnairePackageProvider r5QuestionnairePackageProvider(
             IQuestionnaireProcessorFactory questionnaireProcessorFactory,
             AsyncPackageOperationHelper asyncPackageOperationHelper) {
         return new QuestionnairePackageProvider(questionnaireProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    LibraryPackageProvider r4LibraryPackageProvider(
+    LibraryPackageProvider r5LibraryPackageProvider(
             ILibraryProcessorFactory libraryProcessorFactory, AsyncPackageOperationHelper asyncPackageOperationHelper) {
         return new LibraryPackageProvider(libraryProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    ValueSetPackageProvider r4ValueSetPackageProvider(
+    ValueSetPackageProvider r5ValueSetPackageProvider(
             IValueSetProcessorFactory valueSetProcessorFactory,
             AsyncPackageOperationHelper asyncPackageOperationHelper) {
         return new ValueSetPackageProvider(valueSetProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    GraphDefinitionPackageProvider r4GraphDefinitionPackageProvider(
+    GraphDefinitionPackageProvider r5GraphDefinitionPackageProvider(
             IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory,
             AsyncPackageOperationHelper asyncPackageOperationHelper) {
         return new GraphDefinitionPackageProvider(graphDefinitionProcessorFactory, asyncPackageOperationHelper);
@@ -66,7 +69,7 @@ public class PackageOperationConfig {
         var selector = new ProviderSelector(
                 fhirContext,
                 Map.of(
-                        FhirVersionEnum.R4,
+                        FhirVersionEnum.R5,
                         Arrays.asList(
                                 LibraryPackageProvider.class,
                                 QuestionnairePackageProvider.class,

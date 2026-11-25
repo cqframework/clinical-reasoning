@@ -1,0 +1,119 @@
+package org.opencds.cqf.fhir.cr.hapi.r5.valueset;
+
+import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.Endpoint;
+import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.ValueSet;
+import org.opencds.cqf.fhir.cr.hapi.common.AsyncPackageOperationHelper;
+import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
+
+public class ValueSetPackageProvider {
+    private final IValueSetProcessorFactory valueSetProcessorFactory;
+    private final AsyncPackageOperationHelper asyncHelper;
+    private final FhirVersionEnum fhirVersion;
+
+    public ValueSetPackageProvider(IValueSetProcessorFactory valueSetProcessorFactory) {
+        this(valueSetProcessorFactory, AsyncPackageOperationHelper.disabled());
+    }
+
+    public ValueSetPackageProvider(
+            IValueSetProcessorFactory valueSetProcessorFactory, AsyncPackageOperationHelper asyncHelper) {
+        this.valueSetProcessorFactory = valueSetProcessorFactory;
+        this.asyncHelper = asyncHelper;
+        fhirVersion = FhirVersionEnum.R5;
+    }
+
+    /**
+     * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
+     *
+     * @param id the id of the Resource.
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
+     * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
+     * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
+     */
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = ValueSet.class,
+            manualResponse = true)
+    public void packageValueSet(
+            @IdParam IdType id,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "usePut") BooleanType usePut,
+            RequestDetails requestDetails) {
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> valueSetProcessorFactory
+                        .create(rd)
+                        .packageValueSet(
+                                Eithers.forMiddle3(id),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
+    }
+
+    /**
+     * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
+     *
+     * @param id the id of the Resource.
+     * @param canonical the canonical identifier for the Resource (optionally version-specific).
+     * @param url canonical URL of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
+     * @param version version of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
+     * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
+     * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
+     */
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = ValueSet.class,
+            manualResponse = true)
+    public void packageValueSet(
+            @OperationParam(name = "id") StringType id,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
+            @OperationParam(name = "version") StringType version,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "usePut") BooleanType usePut,
+            RequestDetails requestDetails) {
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> valueSetProcessorFactory
+                        .create(rd)
+                        .packageValueSet(
+                                Eithers.for3(
+                                        getCanonicalType(fhirVersion, canonical, url, version),
+                                        getIdType(fhirVersion, "ValueSet", id),
+                                        null),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
+    }
+}

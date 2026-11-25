@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.dev.server;
 
-import org.opencds.cqf.fhir.cr.dev.server.config.ServerR4Config;
+import org.opencds.cqf.fhir.cr.dev.server.config.ServerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import;
             "org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration",
             "org.springframework.boot.quartz.autoconfigure.QuartzAutoConfiguration"
         })
-@Import(ServerR4Config.class)
+@Import(ServerConfig.class)
 public class Application {
 
     public static void main(String[] args) {

@@ -8,15 +8,13 @@ import ca.uhn.fhir.repository.IRepository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.GraphDefinition;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -33,23 +31,23 @@ public class ApplyRequestBuilder {
     private IRepository repository;
     private final EvaluationSettings evaluationSettings;
     private final FhirVersionEnum fhirVersion;
-    private GraphDefinition graphDefinition;
+    private IBaseResource graphDefinition;
     private String subject;
     private String encounter;
     private String practitioner;
     private String organization;
-    private CodeableConcept userType;
-    private CodeableConcept userLanguage;
-    private CodeableConcept userTaskContext;
-    private CodeableConcept setting;
-    private CodeableConcept settingContext;
+    private ICompositeType userType;
+    private ICompositeType userLanguage;
+    private ICompositeType userTaskContext;
+    private ICompositeType setting;
+    private ICompositeType settingContext;
     private boolean useServerData = true;
     private IBaseBundle data;
-    private List<ParametersParameterComponent> prefetchData;
+    private List<? extends IBaseBackboneElement> prefetchData;
     private IRepository dataRepository;
     private IRepository contentRepository;
     private IRepository terminologyRepository;
-    private Parameters parameters;
+    private IBaseParameters parameters;
     private IIdType id;
     private ZonedDateTime periodStartString;
     private ZonedDateTime periodEndString;
@@ -61,7 +59,7 @@ public class ApplyRequestBuilder {
         this.evaluationSettings = evaluationSettings;
     }
 
-    public ApplyRequestBuilder withGraphDefinitionId(IdType id) {
+    public ApplyRequestBuilder withGraphDefinitionId(IIdType id) {
         this.id = id;
         return this;
     }
@@ -71,7 +69,7 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withGraphDefinition(GraphDefinition graphDefinition) {
+    public ApplyRequestBuilder withGraphDefinition(IBaseResource graphDefinition) {
         this.graphDefinition = graphDefinition;
         return this;
     }
@@ -96,32 +94,32 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withUserType(CodeableConcept userType) {
+    public ApplyRequestBuilder withUserType(ICompositeType userType) {
         this.userType = userType;
         return this;
     }
 
-    public ApplyRequestBuilder withUserLanguage(CodeableConcept userLanguage) {
+    public ApplyRequestBuilder withUserLanguage(ICompositeType userLanguage) {
         this.userLanguage = userLanguage;
         return this;
     }
 
-    public ApplyRequestBuilder withUserTaskContext(CodeableConcept userTaskContext) {
+    public ApplyRequestBuilder withUserTaskContext(ICompositeType userTaskContext) {
         this.userTaskContext = userTaskContext;
         return this;
     }
 
-    public ApplyRequestBuilder withSetting(CodeableConcept setting) {
+    public ApplyRequestBuilder withSetting(ICompositeType setting) {
         this.setting = setting;
         return this;
     }
 
-    public ApplyRequestBuilder withSettingContext(CodeableConcept settingContext) {
+    public ApplyRequestBuilder withSettingContext(ICompositeType settingContext) {
         this.settingContext = settingContext;
         return this;
     }
 
-    public ApplyRequestBuilder withParameters(Parameters parameters) {
+    public ApplyRequestBuilder withParameters(IBaseParameters parameters) {
         this.parameters = parameters;
         return this;
     }
@@ -136,12 +134,12 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withPrefetchData(List<ParametersParameterComponent> prefetchData) {
+    public <T extends IBaseBackboneElement> ApplyRequestBuilder withPrefetchData(List<T> prefetchData) {
         this.prefetchData = prefetchData;
         return this;
     }
 
-    public ApplyRequestBuilder withDataEndpoint(ParametersParameterComponent dataEndpointParam) {
+    public ApplyRequestBuilder withDataEndpoint(IBaseBackboneElement dataEndpointParam) {
         IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, dataEndpointParam);
         this.dataRepository = createRestRepository(repository.fhirContext(), endpoint);
         return this;
@@ -152,7 +150,7 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withContentEndpoint(ParametersParameterComponent contentEndpointParam) {
+    public ApplyRequestBuilder withContentEndpoint(IBaseBackboneElement contentEndpointParam) {
         IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, contentEndpointParam);
         this.contentRepository = createRestRepository(repository.fhirContext(), endpoint);
         return this;
@@ -163,7 +161,7 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withTerminologyEndpoint(ParametersParameterComponent terminologyEndpointParam) {
+    public ApplyRequestBuilder withTerminologyEndpoint(IBaseBackboneElement terminologyEndpointParam) {
         IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, terminologyEndpointParam);
         this.terminologyRepository = createRestRepository(repository.fhirContext(), endpoint);
         return this;

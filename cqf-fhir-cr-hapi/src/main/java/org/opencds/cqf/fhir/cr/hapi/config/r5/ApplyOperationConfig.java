@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.dev.server.config;
+package org.opencds.cqf.fhir.cr.hapi.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -9,31 +9,34 @@ import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFa
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
-import org.opencds.cqf.fhir.cr.hapi.r4.activitydefinition.ActivityDefinitionApplyProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionApplyProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.activitydefinition.ActivityDefinitionApplyProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.graphdefinition.GraphDefinitionApplyProvider;
+import org.opencds.cqf.fhir.cr.hapi.r5.plandefinition.PlanDefinitionApplyProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(CrProcessorConfig.class)
 public class ApplyOperationConfig {
     @Bean
-    ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider(
+    ActivityDefinitionApplyProvider r5ActivityDefinitionApplyProvider(
             IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory) {
         return new ActivityDefinitionApplyProvider(activityDefinitionProcessorFactory);
     }
 
     @Bean
-    PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider(
+    PlanDefinitionApplyProvider r5PlanDefinitionApplyProvider(
             IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
         return new PlanDefinitionApplyProvider(planDefinitionProcessorFactory);
     }
 
     @Bean
-    GraphDefinitionApplyProvider r4GraphDefinitionApplyProvider(
+    GraphDefinitionApplyProvider r5GraphDefinitionApplyProvider(
             IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory,
             IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory,
             FhirContext fhirContext,

@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -20,7 +19,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @param measureReport The scored R4 MeasureReport FHIR resource
  * @param evaluationResults The raw CQL evaluation results per subject ID
  */
-@VisibleForTesting
 public record MeasureDefAndR4MeasureReport(
         MeasureDef measureDef, MeasureReport measureReport, Map<String, CqlEvaluationResult> evaluationResults) {
 

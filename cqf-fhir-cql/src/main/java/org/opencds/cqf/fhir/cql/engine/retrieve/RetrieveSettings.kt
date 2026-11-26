@@ -10,6 +10,9 @@ class RetrieveSettings {
     var terminologyParameterMode: TERMINOLOGY_FILTER_MODE = TERMINOLOGY_FILTER_MODE.AUTO
         private set
 
+    var conversionMode: CONVERSION_MODE = CONVERSION_MODE.AUTO
+        private set
+
     /** Default constructor for RetrieveSettings */
     constructor()
 
@@ -22,6 +25,7 @@ class RetrieveSettings {
         this.searchParameterMode = retrieveSettings.searchParameterMode
         this.profileMode = retrieveSettings.profileMode
         this.terminologyParameterMode = retrieveSettings.terminologyParameterMode
+        this.conversionMode = retrieveSettings.conversionMode
     }
 
     /**
@@ -100,6 +104,24 @@ class RetrieveSettings {
     }
 
     /**
+     * Whether retrieved FHIR resources are converted to CQL values eagerly (every element up front)
+     * or lazily (each element on first access). Lazy conversion restores engine 4.6.0 "convert only
+     * what you read" behavior and avoids materializing whole compartments, but it reads resource
+     * fields at access time, so it is only safe when the repository returns value-stable resources
+     * (not mutated or recycled after retrieval).
+     */
+    enum class CONVERSION_MODE {
+        /** Lazy when the repository is known to return value-stable resources, otherwise eager. */
+        AUTO,
+
+        /** Always convert every element up front (safe for any repository). */
+        EAGER,
+
+        /** Always convert lazily. Only use for a repository known to return stable resources. */
+        LAZY,
+    }
+
+    /**
      * Applies to all search parameters EXCEPT terminology search parameters.
      *
      * @param searchParameterMode whether to use repository search parameters or CQL filtering
@@ -125,6 +147,11 @@ class RetrieveSettings {
 
     fun setProfileMode(profileMode: PROFILE_MODE): RetrieveSettings {
         this.profileMode = profileMode
+        return this
+    }
+
+    fun setConversionMode(conversionMode: CONVERSION_MODE): RetrieveSettings {
+        this.conversionMode = conversionMode
         return this
     }
 }

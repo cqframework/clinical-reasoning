@@ -261,7 +261,7 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenDataRequirements()
-                .hasDataRequirements(19);
+                .hasDataRequirements(12);
     }
 
     @Test
@@ -270,7 +270,7 @@ class QuestionnaireProcessorTests {
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR5, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .thenDataRequirements()
-                .hasDataRequirements(19);
+                .hasDataRequirements(13);
     }
 
     @Test

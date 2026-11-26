@@ -55,6 +55,26 @@ class CqlEngineOptions {
             }
         }
 
+    /**
+     * Disables the engine's global evaluated-resources collection
+     * ([CqlEngine.Options.DisableEvaluatedResourcesCollection]).
+     *
+     * This is a memory lever: the engine otherwise retains every resource touched during an
+     * evaluation for the whole run. Off by default. **Measure evaluation populates
+     * `MeasureReport.evaluatedResource` from the per-expression evaluated-resources, so only enable
+     * this once it has been verified not to empty that output** (see
+     * EvaluatedResourcesCollectionToggleTest).
+     */
+    var isEvaluatedResourcesCollectionDisabled: Boolean
+        get() = this.options.contains(CqlEngine.Options.DisableEvaluatedResourcesCollection)
+        set(disabled) {
+            if (disabled) {
+                this.options.add(CqlEngine.Options.DisableEvaluatedResourcesCollection)
+            } else {
+                this.options.remove(CqlEngine.Options.DisableEvaluatedResourcesCollection)
+            }
+        }
+
     fun shouldExpandValueSets(): Boolean {
         return this.shouldExpandValueSets
     }
